@@ -1,5 +1,9 @@
 import customtkinter as ctk # Better Tkinter
 import os
+import re  # Regular expressions for password validation
+from decimal import Decimal
+import math  # For logarithmic calculations
+
 
 # Define a modern color palette for my application
 COLORS = {
@@ -83,9 +87,122 @@ class PasswordCheckerApp(ctk.CTk):
             fg_color=COLORS["button"],
             hover_color=COLORS["button_hover"],
             corner_radius=10,
-            #command=self.check_password_strength,
+            command=self.check_password_strength,
         )
         self.check_button.pack(pady=10)
+        
+        # Result label
+        self.result_label = ctk.CTkLabel(
+            self,
+            text="",
+            font=("Helvetica", 22, "bold"),
+            text_color=COLORS["text_primary"],
+        )
+        self.result_label.pack(pady=(20, 10))
+
+        # Feedback label
+        self.feedback_label = ctk.CTkLabel(
+            self,
+            text="",
+            font=("Helvetica", 14),
+            text_color=COLORS["text_secondary"],
+            wraplength=600,
+            justify="left",
+        )
+        self.feedback_label.pack(pady=(10, 20))
+
+        # Time to crack label
+        self.time_to_crack_label = ctk.CTkLabel(
+            self,
+            text="",
+            font=("Helvetica", 14),
+            text_color=COLORS["text_secondary"],
+            wraplength=600,
+            justify="left",
+        )
+        self.time_to_crack_label.pack(pady=(10, 20))
+
+    def check_password_strength(self):
+        password = self.password_entry.get()
+
+        # Easter egg for specific passwords
+        if password.lower() in ["bean", "fong", "fongy", "ben", "password123"]:
+            self.result_label.configure(text="Terrible", text_color="#FF5252")  # Red for bad passwords
+            self.feedback_label.configure(text="That's a good password! Try something more original!")
+            self.time_to_crack_label.configure(text="")
+            return
+
+        # Regular password strength evaluation
+        strength, color, feedback, time_to_crack = self.evaluate_password(password)
+        self.result_label.configure(text=strength, text_color=color)
+        self.feedback_label.configure(text=feedback)
+        self.time_to_crack_label.configure(text=f"Estimated time to crack: {time_to_crack}")
+
+    def evaluate_password(self, password):
+        # Initialize feedback
+        feedback = []
+
+        # Determine character set size
+        charset_size = 0
+        if re.search(r"[a-z]", password):
+            charset_size += 26  # Lowercase letters (a-z)
+        else:
+            feedback.append("Add at least one lowercase letter.")
+        if re.search(r"[A-Z]", password):
+            charset_size += 26  # Uppercase letters (A-Z)
+        else:
+            feedback.append("Add at least one uppercase letter.")
+        if re.search(r"[0-9]", password):
+            charset_size += 10  # Numbers (0-9)
+        else:
+            feedback.append("Add at least one number.")
+        if re.search(r"[!\"#$%&'()*+,-./:;<=>?@\[\\\]^_`{|}~]", password):
+            charset_size += 32  # Special characters (all valid printable symbols)
+        else:
+            feedback.append("Add at least one special character (e.g., !, @, #, etc.).")
+
+        # Calculate entropy
+        if charset_size > 0:
+            entropy = len(password) * math.log2(charset_size)
+        else:
+            entropy = 0
+
+        # Estimate time to crack using logarithms to avoid overflow
+        guesses_per_second = Decimal(1e10)  # Assume 10 Billion guesses per second
+
+        try:
+            log_total_guesses = Decimal(entropy)  # Use entropy directly in logarithmic form
+            seconds_to_crack = Decimal(2) ** log_total_guesses / guesses_per_second
+
+            # Heat death of the universe: ~1e100 years in seconds
+            heat_death_seconds = Decimal("1e100") * Decimal(31536000)
+
+            if seconds_to_crack > heat_death_seconds:
+                time_to_crack = "Longer than the heat death of the universe! Probably pretty secure."
+            elif seconds_to_crack < 60:
+                time_to_crack = f"{seconds_to_crack:.2f} seconds"
+            elif seconds_to_crack < 3600:
+                time_to_crack = f"{seconds_to_crack / 60:.2f} minutes"
+            elif seconds_to_crack < 86400:
+                time_to_crack = f"{seconds_to_crack / 3600:.2f} hours"
+            elif seconds_to_crack < 31536000:
+                time_to_crack = f"{seconds_to_crack / 86400:.2f} days"
+            else:
+                time_to_crack = f"{seconds_to_crack / 31536000:.2f} years"
+        except Exception:
+            time_to_crack = "Inputted password is too large. Why do you need a password this long? Try something shorter."
+
+        # Determine strength based on harsher entropy thresholds
+        if entropy < 36:
+            return "Weak", "#FF5252", " ".join(feedback), time_to_crack  # Red for weak passwords
+        elif entropy < 60:
+            return "Moderate", "#FFC107", " ".join(feedback), time_to_crack  # Yellow for moderate passwords
+        elif entropy < 120:
+            return "Strong", "#4CAF50", " ".join(feedback), time_to_crack  # Green for strong passwords
+        else:
+            return "Very Strong", "#66BB6A", "Your password is excellent!", time_to_crack  # Lighter green for very strong passwords
+
+
 
 if __name__ == "__main__":
     os.system('cls||clear')  # Clear the console even for stupid macs
