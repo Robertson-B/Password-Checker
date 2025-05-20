@@ -1,13 +1,12 @@
-import customtkinter as ctk # Better Tkinter
-import os
-import re  # Regular expressions for password validation
+import customtkinter as ctk
+import math
+import re
 from decimal import Decimal
-import math  # For logarithmic calculations
 import random
 import string
+import os
 
-
-# Define a modern color palette for my application
+# Define a modern color palette
 COLORS = {
     "background": "#F0F4F8",  # Light blue-gray
     "header": "#005A9E",  # Deep blue
@@ -29,9 +28,9 @@ class PasswordCheckerApp(ctk.CTk):
         self.title("Password Strength Checker")
         self.geometry("800x600")  # Larger window size
         self.configure(bg=COLORS["background"])  # Use modern background color
-        
+
         # Set light mode and custom theme
-        ctk.set_appearance_mode("light") # Dark mode looks crap in custom tkinter
+        ctk.set_appearance_mode("light")
         ctk.set_default_color_theme("MoonlitSky.json")  # Use the custom theme for redundancy in case i forgot to set custom colours
 
         # Create widgets
@@ -93,7 +92,7 @@ class PasswordCheckerApp(ctk.CTk):
         )
         self.check_button.pack(pady=10)
 
-# Generate Password button
+        # Generate Password button
         self.generate_button = ctk.CTkButton(
             self.card_frame,
             text="Generate Secure Password",
@@ -116,7 +115,7 @@ class PasswordCheckerApp(ctk.CTk):
             command=self.copy_password_to_clipboard,
         )
         self.copy_button.pack(pady=10)
-        
+
         # Result label
         self.result_label = ctk.CTkLabel(
             self,
@@ -147,6 +146,81 @@ class PasswordCheckerApp(ctk.CTk):
             justify="left",
         )
         self.time_to_crack_label.pack(pady=(10, 20))
+
+        # Help button at the bottom right (no extra frame)
+        self.help_button = ctk.CTkButton(
+            self,
+            text="Help",
+            font=("Helvetica", 14),
+            fg_color="#888888",
+            hover_color="#555555",
+            corner_radius=10,
+            command=self.open_help_window,
+        )
+        # Use place for bottom-right positioning
+        self.help_button.place(relx=1.0, rely=1.0, anchor="se", x=-20, y=-20)
+
+        # About Developer button just left of Help
+        self.about_button = ctk.CTkButton(
+            self,
+            text="About Developer",
+            font=("Helvetica", 14),
+            fg_color="#888888",
+            hover_color="#555555",
+            corner_radius=10,
+            command=self.open_about_window,
+        )
+        self.about_button.place(relx=1.0, rely=1.0, anchor="se", x=-170, y=-20)  # 150px left of Help
+
+    def open_help_window(self):
+        # Store reference to prevent garbage collection
+        if hasattr(self, "help_win") and self.help_win.winfo_exists():
+            self.help_win.lift()
+            return
+        self.help_win = ctk.CTkToplevel(self)
+        self.help_win.title("Help")
+        self.help_win.geometry("400x300")
+        self.help_win.resizable(False, False)
+        help_label = ctk.CTkLabel(
+            self.help_win,
+            text=(
+                "How to use Password Strength Checker:\n\n"
+                "1. Enter a password in the box.\n"
+                "2. Click 'Check Strength' to see how strong it is.\n"
+                "3. Click 'Generate Secure Password' for a strong suggestion.\n"
+                "4. Click 'Copy to Clipboard' to copy the password.\n"
+                "5. Avoid using common or simple passwords (like 'passswors' or 'abc123').\n"
+                "\nGreen means strong, red means weak. "
+                "Try to use a mix of letters, numbers, and symbols!"
+            ),
+            font=("Helvetica", 13),
+            wraplength=380,
+            justify="left",
+        )
+        help_label.pack(padx=20, pady=20)
+
+    def open_about_window(self):
+        if hasattr(self, "about_win") and self.about_win.winfo_exists():
+            self.about_win.lift()
+            return
+        self.about_win = ctk.CTkToplevel(self)
+        self.about_win.title("About the Developer")
+        self.about_win.geometry("400x200")
+        self.about_win.resizable(False, False)
+        about_label = ctk.CTkLabel(
+            self.about_win,
+            text=(
+                "Password Checker\n"
+                "Developed by BitRealm Games\n\n"
+                "GitHub: example github\n"
+                "Contact: example email\n\n"
+                "Thanks for using this app!"
+            ),
+            font=("Helvetica", 13),
+            wraplength=380,
+            justify="left",
+        )
+        about_label.pack(padx=20, pady=20)
 
     def generate_secure_password(self):
         """Generate a random, secure password with widely accepted special characters."""
