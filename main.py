@@ -3,6 +3,8 @@ import os
 import re  # Regular expressions for password validation
 from decimal import Decimal
 import math  # For logarithmic calculations
+import random
+import string
 
 
 # Define a modern color palette for my application
@@ -90,6 +92,30 @@ class PasswordCheckerApp(ctk.CTk):
             command=self.check_password_strength,
         )
         self.check_button.pack(pady=10)
+
+# Generate Password button
+        self.generate_button = ctk.CTkButton(
+            self.card_frame,
+            text="Generate Secure Password",
+            font=("Helvetica", 16),
+            fg_color="#4CAF50",  # Green button for generating passwords
+            hover_color="#388E3C",  # Darker green on hover
+            corner_radius=10,
+            command=self.generate_secure_password,
+        )
+        self.generate_button.pack(pady=10)
+
+        # Copy to Clipboard button
+        self.copy_button = ctk.CTkButton(
+            self.card_frame,
+            text="Copy to Clipboard",
+            font=("Helvetica", 16),
+            fg_color="#FFA500",  # Orange button for copy
+            hover_color="#CC8400",  # Darker orange on hover
+            corner_radius=10,
+            command=self.copy_password_to_clipboard,
+        )
+        self.copy_button.pack(pady=10)
         
         # Result label
         self.result_label = ctk.CTkLabel(
@@ -121,6 +147,16 @@ class PasswordCheckerApp(ctk.CTk):
             justify="left",
         )
         self.time_to_crack_label.pack(pady=(10, 20))
+
+    def generate_secure_password(self):
+        """Generate a random, secure password with widely accepted special characters."""
+        length = 24  # Length of the generated password
+        # Safer special characters for most sites
+        safe_specials = "!@#$%^&*()-_=+[]{};:,.?/"
+        characters = string.ascii_letters + string.digits + safe_specials
+        password = "".join(random.choice(characters) for _ in range(length))
+        self.password_entry.delete(0, "end")  # Clear the entry field
+        self.password_entry.insert(0, password)  # Insert the generated password
 
     def check_password_strength(self):
         password = self.password_entry.get()
@@ -202,6 +238,10 @@ class PasswordCheckerApp(ctk.CTk):
         else:
             return "Very Strong", "#66BB6A", "Your password is excellent!", time_to_crack  # Lighter green for very strong passwords
 
+    def copy_password_to_clipboard(self):
+        password = self.password_entry.get()
+        self.clipboard_clear()
+        self.clipboard_append(password)
 
 
 if __name__ == "__main__":
