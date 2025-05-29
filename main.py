@@ -1,12 +1,12 @@
-import customtkinter as ctk
-import math
-import re
-from decimal import Decimal
-import random
-import string
-import os
+import customtkinter as ctk # Better than tkinter
+import math # For entropy
+import re # Regular expressions for password checking
+from decimal import Decimal # Allows the program to store massive numbers
+import random # For generating random passwords
+import string # For generating random passwords
+import os # For clearing the console
 
-# Define a modern color palette
+# Define a modern color palette for the app
 COLORS = {
     "background": "#F0F4F8",  # Light blue-gray
     "header": "#005A9E",  # Deep blue
@@ -26,11 +26,12 @@ class PasswordCheckerApp(ctk.CTk):
 
         # Configure the window
         self.title("Password Strength Checker")
-        self.geometry("800x600")  # Larger window size
+        self.geometry("800x600")  # Large window size
+        self.resizable(False, False)
         self.configure(bg=COLORS["background"])  # Use modern background color
 
         # Set light mode and custom theme
-        ctk.set_appearance_mode("light")
+        ctk.set_appearance_mode("light") # Dark mode is for losers
         ctk.set_default_color_theme("MoonlitSky.json")  # Use the custom theme for redundancy in case i forgot to set custom colours
 
         # Create widgets
@@ -43,7 +44,7 @@ class PasswordCheckerApp(ctk.CTk):
 
         self.header_label = ctk.CTkLabel(
             self.header_frame,
-            text="🔒 Password Strength Checker 🔒",
+            text="🔒 Password Strength Checker 🔒", # Emoji support
             font=("Helvetica", 30, "bold"),
             text_color="#FFFFFF",  # White text for contrast
         )
@@ -58,7 +59,7 @@ class PasswordCheckerApp(ctk.CTk):
         )
         self.sub_header_label.pack(pady=(10, 20))
 
-        # Card-like frame for password entry and buttons
+        # Frame for password entry and buttons
         self.card_frame = ctk.CTkFrame(
             self,
             fg_color=COLORS["card_bg"],
@@ -92,7 +93,7 @@ class PasswordCheckerApp(ctk.CTk):
         )
         self.check_button.pack(pady=10)
 
-        # Generate Password button
+        # Generate Random Password button
         self.generate_button = ctk.CTkButton(
             self.card_frame,
             text="Generate Secure Password",
@@ -147,7 +148,7 @@ class PasswordCheckerApp(ctk.CTk):
         )
         self.time_to_crack_label.pack(pady=(10, 20))
 
-        # Help button at the bottom right (no extra frame)
+        # Help button at the bottom right 
         self.help_button = ctk.CTkButton(
             self,
             text="Help",
@@ -173,9 +174,9 @@ class PasswordCheckerApp(ctk.CTk):
         self.about_button.place(relx=1.0, rely=1.0, anchor="se", x=-170, y=-20)  # 150px left of Help
 
     def open_help_window(self):
-        # Store reference to prevent garbage collection
-        if hasattr(self, "help_win") and self.help_win.winfo_exists():
+        if hasattr(self, "help_win") and self.help_win.winfo_exists(): # Why is this the only way to check if a window exists?
             self.help_win.lift()
+            self.help_win.attributes("-topmost", True)
             return
         self.help_win = ctk.CTkToplevel(self)
         self.help_win.title("Help")
@@ -198,10 +199,13 @@ class PasswordCheckerApp(ctk.CTk):
             justify="left",
         )
         help_label.pack(padx=20, pady=20)
+        self.help_win.attributes("-topmost", True)
+        self.help_win.lift()
 
-    def open_about_window(self):
+    def open_about_window(self): # I know this is a mess, but I don't care.
         if hasattr(self, "about_win") and self.about_win.winfo_exists():
             self.about_win.lift()
+            self.about_win.attributes("-topmost", True)
             return
         self.about_win = ctk.CTkToplevel(self)
         self.about_win.title("About the Developer")
@@ -212,8 +216,8 @@ class PasswordCheckerApp(ctk.CTk):
             text=(
                 "Password Checker\n"
                 "Developed by BitRealm Games\n\n"
-                "GitHub: example github\n"
-                "Contact: example email\n\n"
+                "GitHub: https://github.com/Robertson-B\n"
+                "Contact: BitRealmgames@gmail.com\n\n"
                 "Thanks for using this app!"
             ),
             font=("Helvetica", 13),
@@ -221,9 +225,11 @@ class PasswordCheckerApp(ctk.CTk):
             justify="left",
         )
         about_label.pack(padx=20, pady=20)
+        self.about_win.attributes("-topmost", True)
+        self.about_win.lift()
 
     def generate_secure_password(self):
-        """Generate a random, secure password with widely accepted special characters."""
+        #Generate a random, secure password with widely accepted special characters.
         length = 24  # Length of the generated password
         # Safer special characters for most sites
         safe_specials = "!@#$%^&*()-_=+[]{};:,.?/"
@@ -238,7 +244,7 @@ class PasswordCheckerApp(ctk.CTk):
         # Easter egg for specific passwords
         if password.lower() in ["bean", "fong", "fongy", "ben", "password123"]:
             self.result_label.configure(text="Terrible", text_color="#FF5252")  # Red for bad passwords
-            self.feedback_label.configure(text="That's a good password! Try something more original!")
+            self.feedback_label.configure(text="That's a crap password! Try something more original!")
             self.time_to_crack_label.configure(text="")
             return
 
@@ -278,7 +284,7 @@ class PasswordCheckerApp(ctk.CTk):
             entropy = 0
 
         # Estimate time to crack using logarithms to avoid overflow
-        guesses_per_second = Decimal(1e10)  # Assume 10 Billion guesses per second
+        guesses_per_second = Decimal(1e14)  # Assume 100 Trillion guesses per second
 
         try:
             log_total_guesses = Decimal(entropy)  # Use entropy directly in logarithmic form
@@ -312,7 +318,7 @@ class PasswordCheckerApp(ctk.CTk):
         else:
             return "Very Strong", "#66BB6A", "Your password is excellent!", time_to_crack  # Lighter green for very strong passwords
 
-    def copy_password_to_clipboard(self):
+    def copy_password_to_clipboard(self): # Self explanatory
         password = self.password_entry.get()
         self.clipboard_clear()
         self.clipboard_append(password)
