@@ -5,7 +5,7 @@ from decimal import Decimal # Allows the program to store massive numbers
 import random # For generating random passwords
 import string # For generating random passwords
 import os # For clearing the console
-import urllib.request
+import urllib.request # For checking if the password is in a public GitHub list of common passwords
 
 # Define a modern color palette for the app
 COLORS = {
@@ -71,6 +71,7 @@ class PasswordCheckerApp(ctk.CTk):
         self.card_frame.pack(pady=(20, 20), padx=20)
 
         # Password entry
+        vcmd = self.register(self.validate_no_whitespace)
         self.password_entry = ctk.CTkEntry(
             self.card_frame,
             placeholder_text="Enter your password",
@@ -79,6 +80,8 @@ class PasswordCheckerApp(ctk.CTk):
             fg_color=COLORS["entry_bg"],
             border_color=COLORS["entry_border"],
             text_color="#000000",  # Set text color to black
+            validate="key",
+            validatecommand=(vcmd, "%P"),
         )
         self.password_entry.pack(padx=20, pady=20)
 
@@ -191,7 +194,7 @@ class PasswordCheckerApp(ctk.CTk):
                 "2. Click 'Check Strength' to see how strong it is.\n"
                 "3. Click 'Generate Secure Password' for a strong suggestion.\n"
                 "4. Click 'Copy to Clipboard' to copy the password.\n"
-                "5. Avoid using common or simple passwords (like 'passswors' or 'abc123').\n"
+                "5. Avoid using common or simple passwords (like 'passsword' or 'abc123').\n"
                 "\nGreen means strong, red means weak. "
                 "Try to use a mix of letters, numbers, and symbols!"
             ),
@@ -217,6 +220,8 @@ class PasswordCheckerApp(ctk.CTk):
             text=(
                 "Password Checker\n"
                 "Developed by BitRealm Games\n\n"
+                "Created using Python and CustomTkinter.\n"
+                "And absolute hatred for tkinter and gooeypie\n\n"
                 "GitHub: https://github.com/Robertson-B\n"
                 "Contact: BitRealmgames@gmail.com\n\n"
                 "Thanks for using this app!"
@@ -314,7 +319,7 @@ class PasswordCheckerApp(ctk.CTk):
             else:
                 time_to_crack = f"{seconds_to_crack / 31536000:.2f} years"
         except Exception:
-            time_to_crack = "Inputted password is too large. Why do you need a password this long? Try something shorter."
+            time_to_crack = "Inputted password is too large. Why do you need a password this long? Your breaking python! Try something shorter."
 
         # Determine strength based on harsher entropy thresholds
         if entropy < 36:
@@ -343,10 +348,14 @@ class PasswordCheckerApp(ctk.CTk):
             print(f"Error checking GitHub password list: {i}")
         return False
 
+    def validate_no_whitespace(self, new_value):
+        # Return False if new_value contains any whitespace character
+        return not any(c.isspace() for c in new_value)
+
 
 if __name__ == "__main__":
     os.system('cls||clear')  # Clear the console even for stupid macs
-    print("\u001b[31;1mLook at the GUI, not the console.")
-    print("\u001b[34m\u001b[0m", end="")
+    print("\u001b[31;1mLook at the GUI, not the console.") # Colour in the console
+    print("\u001b[34m\u001b[0m", end="") 
     app = PasswordCheckerApp()
     app.mainloop()
