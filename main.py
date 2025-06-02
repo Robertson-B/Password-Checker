@@ -5,6 +5,7 @@ from decimal import Decimal # Allows the program to store massive numbers
 import random # For generating random passwords
 import string # For generating random passwords
 import os # For clearing the console
+import urllib.request
 
 # Define a modern color palette for the app
 COLORS = {
@@ -241,8 +242,15 @@ class PasswordCheckerApp(ctk.CTk):
     def check_password_strength(self):
         password = self.password_entry.get()
 
+        # Check against GitHub password list
+        if self.is_password_in_github_list(password): # Checks if the password is really common
+            self.result_label.configure(text="Common", text_color="#FF5252")
+            self.feedback_label.configure(text="This password appears in a public list and is really common. Choose another one!")
+            self.time_to_crack_label.configure(text="")
+            return
+
         # Easter egg for specific passwords
-        if password.lower() in ["bean", "fong", "fongy", "ben", "password123"]:
+        if password.lower() in ["bean", "fong", "fongy", "ben"]:
             self.result_label.configure(text="Terrible", text_color="#FF5252")  # Red for bad passwords
             self.feedback_label.configure(text="That's a crap password! Try something more original!")
             self.time_to_crack_label.configure(text="")
@@ -322,6 +330,18 @@ class PasswordCheckerApp(ctk.CTk):
         password = self.password_entry.get()
         self.clipboard_clear()
         self.clipboard_append(password)
+
+    # Checks if the password is in a public GitHub list of common passwords
+    def is_password_in_github_list(self, password):
+        RAW_GITHUB_URL = "https://raw.githubusercontent.com/danielmiessler/SecLists/refs/heads/master/Passwords/Common-Credentials/xato-net-10-million-passwords-100000.txt"
+        try:
+            with urllib.request.urlopen(RAW_GITHUB_URL) as response:
+                for line in response:
+                    if password.strip() == line.decode('utf-8').strip():
+                        return True
+        except Exception as i:
+            print(f"Error checking GitHub password list: {i}")
+        return False
 
 
 if __name__ == "__main__":
