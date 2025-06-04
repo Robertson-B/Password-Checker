@@ -21,6 +21,9 @@ COLORS = {
     "card_border": "#E0E0E0",  # Light gray for card borders
 }
 
+# Define allowed characters for password input
+ALLOWED_PASSWORD_CHARS = string.ascii_letters + string.digits + "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
+
 class PasswordCheckerApp(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -71,7 +74,7 @@ class PasswordCheckerApp(ctk.CTk):
         self.card_frame.pack(pady=(20, 20), padx=20)
 
         # Password entry
-        vcmd = self.register(self.validate_no_whitespace)
+        vcmd = self.register(self.validate_password_input)
         self.password_entry = ctk.CTkEntry(
             self.card_frame,
             placeholder_text="Enter your password",
@@ -79,7 +82,7 @@ class PasswordCheckerApp(ctk.CTk):
             width=400,
             fg_color=COLORS["entry_bg"],
             border_color=COLORS["entry_border"],
-            text_color="#000000",  # Set text color to black
+            text_color="#000000",
             validate="key",
             validatecommand=(vcmd, "%P"),
         )
@@ -236,7 +239,7 @@ class PasswordCheckerApp(ctk.CTk):
 
     def generate_secure_password(self):
         #Generate a random, secure password with widely accepted special characters.
-        length = 24  # Length of the generated password
+        length =  16  # Length of the generated password
         # Safer special characters for most sites
         safe_specials = "!@#$%^&*()-_=+[]{};:,.?/"
         characters = string.ascii_letters + string.digits + safe_specials
@@ -325,6 +328,7 @@ class PasswordCheckerApp(ctk.CTk):
         try:
             log_total_guesses = Decimal(entropy)  # Use entropy directly in logarithmic form
             seconds_to_crack = Decimal(2) ** log_total_guesses / guesses_per_second
+            # Have to use Decimal for large numbers to avoid overflow issues
 
             # Heat death of the universe: ~1e100 years in seconds
             heat_death_seconds = Decimal("1e100") * Decimal(31536000)
@@ -391,9 +395,12 @@ class PasswordCheckerApp(ctk.CTk):
             print(f"Error reading cached password list: {e}")
         return False
 
-    def validate_no_whitespace(self, new_value):
-        # Return False if new_value contains any whitespace character
-        return not any(c.isspace() for c in new_value)
+    def validate_password_input(self, new_value): 
+    # Only allow valid characters in the password entry
+        for c in new_value:
+            if c not in ALLOWED_PASSWORD_CHARS:
+                return False
+        return True
 
 
 if __name__ == "__main__":
