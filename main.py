@@ -1,11 +1,13 @@
-import customtkinter as ctk # Better than tkinter
+import customtkinter as ctk # Better than tkinter and gooeypie
 import math # For entropy
 import re # Regular expressions for password checking
 from decimal import Decimal # Allows the program to store massive numbers
-import random # For generating random passwords
-import string # For generating random passwords
-import os # For clearing the console
+import random  # For generating random passwords
+import string  # For generating random passwords
+import os  # For clearing the console
 import urllib.request # For checking if the password is in a public GitHub list of common passwords
+import webbrowser # For easter eggs
+import pwnedpass # For checking if the password has been pwned in data breaches
 
 # Define a modern color palette for the app
 COLORS = {
@@ -153,7 +155,21 @@ class PasswordCheckerApp(ctk.CTk):
             wraplength=600,
             justify="left",
         )
-        self.time_to_crack_label.pack(pady=(10, 20))
+        self.time_to_crack_label.pack(pady=(0, 0))  # Move up by reducing top padding
+
+        # Pwned count label 
+        self.pwned_count_label = ctk.CTkLabel(
+            self,
+            text="",
+            font=("Helvetica", 14),
+            text_color="#FF5252",
+            wraplength=600,
+            justify="left",
+        )
+        self.pwned_count_label.pack(pady=(0, 10))  # Move up by reducing bottom padding
+
+        # Spacer to push buttons down
+        ctk.CTkLabel(self, text="").pack(expand=True, fill="both")  # Add a flexible spacer
 
         # Help button at the bottom right 
         self.help_button = ctk.CTkButton(
@@ -165,7 +181,6 @@ class PasswordCheckerApp(ctk.CTk):
             corner_radius=10,
             command=self.open_help_window,
         )
-        # Use place for bottom-right positioning
         self.help_button.place(relx=1.0, rely=1.0, anchor="se", x=-20, y=-20)
 
         # About Developer button just left of Help
@@ -216,24 +231,47 @@ class PasswordCheckerApp(ctk.CTk):
             return
         self.about_win = ctk.CTkToplevel(self)
         self.about_win.title("About the Developer")
-        self.about_win.geometry("400x200")
+        self.about_win.geometry("400x240")
         self.about_win.resizable(False, False)
+
+        about_text = (
+            "Password Checker\n"
+            "Developed by BitRealm Games\n\n"
+            "Created using Python and CustomTkinter.\n"
+            "And absolute hatred for tkinter and gooeypie\n\n"
+            "Thanks for using this app!"
+        )
         about_label = ctk.CTkLabel(
             self.about_win,
-            text=(
-                "Password Checker\n"
-                "Developed by BitRealm Games\n\n"
-                "Created using Python and CustomTkinter.\n"
-                "And absolute hatred for tkinter and gooeypie\n\n"
-                "GitHub: https://github.com/Robertson-B\n"
-                "Contact: BitRealmgames@gmail.com\n\n"
-                "Thanks for using this app!"
-            ),
+            text=about_text,
             font=("Helvetica", 13),
             wraplength=380,
             justify="left",
         )
-        about_label.pack(padx=20, pady=20)
+        about_label.pack(padx=20, pady=(20, 5))
+
+        # GitHub link
+        github_link = ctk.CTkLabel(
+            self.about_win,
+            text="GitHub: https://github.com/Robertson-B",
+            font=("Helvetica", 13, "underline"),
+            text_color="#1a0dab",  # blue
+            cursor="hand2"
+        )
+        github_link.pack(padx=20, pady=(0, 0))
+        github_link.bind("<Button-1>", lambda e: webbrowser.open("https://github.com/Robertson-B"))
+
+        # Email link
+        email_link = ctk.CTkLabel(
+            self.about_win,
+            text="Contact: BitRealmgames@gmail.com",
+            font=("Helvetica", 13, "underline"),
+            text_color="#1a0dab",  # blue
+            cursor="hand2"
+        )
+        email_link.pack(padx=20, pady=(0, 20))
+        email_link.bind("<Button-1>", lambda e: webbrowser.open("mailto:BitRealmgames@gmail.com"))
+
         self.about_win.attributes("-topmost", True)
         self.about_win.lift()
 
@@ -255,36 +293,44 @@ class PasswordCheckerApp(ctk.CTk):
             self.result_label.configure(text="Terrible", text_color="#FF5252")  # Red for bad passwords
             self.feedback_label.configure(text="That's a crap password Fong! Try something more original!")
             self.time_to_crack_label.configure(text="")
+            self.pwned_count_label.configure(text="")  # Clear pwned count
             return
         elif password.lower() == "upupdowndownleftrightleftrightba":
             self.result_label.configure(text="Easter Egg!", text_color="#FFC107")
             self.feedback_label.configure(text="Konami Code detected! Unfortunately, no extra lives here.")
             self.time_to_crack_label.configure(text="")
+            self.pwned_count_label.configure(text="")
             return
         elif password.lower() == "nevergonnagiveyouup":
             self.result_label.configure(text="Rickrolled!", text_color="#FFC107")
             self.feedback_label.configure(text="🎵 Never gonna let you down... but this password will!")
             self.time_to_crack_label.configure(text="")
+            self.pwned_count_label.configure(text="")
+            webbrowser.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
             return
         elif password.lower() in ["bitrealm", "bitrealmgames", "robertson", "brobertson", "bean", "ben","benjamin"]:
             self.result_label.configure(text="Imposter!", text_color="#FFC107")
             self.feedback_label.configure(text="Trying to impersonate the developer? Nice try!")
             self.time_to_crack_label.configure(text="")
+            self.pwned_count_label.configure(text="")
             return
         elif password.lower() in ["1337", "h4x0r", "leet", "l33t", "hacker", "h4cker"]:
             self.result_label.configure(text="Leet Detected!", text_color="#FFC107")
             self.feedback_label.configure(text="Leet detected! Hack the planet!")
             self.time_to_crack_label.configure(text="")
+            self.pwned_count_label.configure(text="")
             return
         elif password.lower() == "drowssap":
             self.result_label.configure(text="Sneaky!", text_color="#FFC107")
             self.feedback_label.configure(text="Trying to be sneaky? 'password' backwards is still weak!")
             self.time_to_crack_label.configure(text="")
+            self.pwned_count_label.configure(text="")
             return
         elif self.is_password_in_github_list(password): # Check against GitHub password list
             self.result_label.configure(text="Common", text_color="#FF5252")
             self.feedback_label.configure(text="This password appears in a public list and is really common. Choose another one!")
             self.time_to_crack_label.configure(text="")
+            self.pwned_count_label.configure(text="")
             return
         else:
             # Regular password strength evaluation
@@ -292,6 +338,23 @@ class PasswordCheckerApp(ctk.CTk):
             self.result_label.configure(text=strength, text_color=color)
             self.feedback_label.configure(text=feedback)
             self.time_to_crack_label.configure(text=f"Estimated time to crack: {time_to_crack}")
+            self.pwned_count_label.configure(text="")
+
+            # Pwnedpass check
+            try:
+                pwned_count = pwnedpass.pwned(password)
+            except Exception:
+                pwned_count = 0
+            if pwned_count:
+                self.pwned_count_label.configure(
+                    text=f"This password has been found {pwned_count:,} times in data breaches!",
+                    text_color="#FF5252"  # Red for breached
+                )
+            else:
+                self.pwned_count_label.configure(
+                    text="This password has not been found in any known data breaches.",
+                    text_color=COLORS["text_secondary"]  # Neutral color for safe
+                )
 
     def evaluate_password(self, password):
         # Initialize feedback
