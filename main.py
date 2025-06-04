@@ -247,25 +247,48 @@ class PasswordCheckerApp(ctk.CTk):
     def check_password_strength(self):
         password = self.password_entry.get()
 
-        # Check against GitHub password list
-        if self.is_password_in_github_list(password): # Checks if the password is really common
+        # Easter egg for specific passwords
+        if password.lower() in ["fong", "fongy",]:
+            self.result_label.configure(text="Terrible", text_color="#FF5252")  # Red for bad passwords
+            self.feedback_label.configure(text="That's a crap password Fong! Try something more original!")
+            self.time_to_crack_label.configure(text="")
+            return
+        elif password.lower() == "upupdowndownleftrightleftrightba":
+            self.result_label.configure(text="Easter Egg!", text_color="#FFC107")
+            self.feedback_label.configure(text="Konami Code detected! Unfortunately, no extra lives here.")
+            self.time_to_crack_label.configure(text="")
+            return
+        elif password.lower() == "nevergonnagiveyouup":
+            self.result_label.configure(text="Rickrolled!", text_color="#FFC107")
+            self.feedback_label.configure(text="🎵 Never gonna let you down... but this password will!")
+            self.time_to_crack_label.configure(text="")
+            return
+        elif password.lower() in ["bitrealm", "bitrealmgames", "robertson", "brobertson", "bean", "ben","benjamin"]:
+            self.result_label.configure(text="Imposter!", text_color="#FFC107")
+            self.feedback_label.configure(text="Trying to impersonate the developer? Nice try!")
+            self.time_to_crack_label.configure(text="")
+            return
+        elif password.lower() in ["1337", "h4x0r", "leet", "l33t", "hacker", "h4cker"]:
+            self.result_label.configure(text="Leet Detected!", text_color="#FFC107")
+            self.feedback_label.configure(text="Leet detected! Hack the planet!")
+            self.time_to_crack_label.configure(text="")
+            return
+        elif password.lower() == "drowssap":
+            self.result_label.configure(text="Sneaky!", text_color="#FFC107")
+            self.feedback_label.configure(text="Trying to be sneaky? 'password' backwards is still weak!")
+            self.time_to_crack_label.configure(text="")
+            return
+        elif self.is_password_in_github_list(password): # Check against GitHub password list
             self.result_label.configure(text="Common", text_color="#FF5252")
             self.feedback_label.configure(text="This password appears in a public list and is really common. Choose another one!")
             self.time_to_crack_label.configure(text="")
             return
-
-        # Easter egg for specific passwords
-        if password.lower() in ["bean", "fong", "fongy", "ben"]:
-            self.result_label.configure(text="Terrible", text_color="#FF5252")  # Red for bad passwords
-            self.feedback_label.configure(text="That's a crap password! Try something more original!")
-            self.time_to_crack_label.configure(text="")
-            return
-
-        # Regular password strength evaluation
-        strength, color, feedback, time_to_crack = self.evaluate_password(password)
-        self.result_label.configure(text=strength, text_color=color)
-        self.feedback_label.configure(text=feedback)
-        self.time_to_crack_label.configure(text=f"Estimated time to crack: {time_to_crack}")
+        else:
+            # Regular password strength evaluation
+            strength, color, feedback, time_to_crack = self.evaluate_password(password)
+            self.result_label.configure(text=strength, text_color=color)
+            self.feedback_label.configure(text=feedback)
+            self.time_to_crack_label.configure(text=f"Estimated time to crack: {time_to_crack}")
 
     def evaluate_password(self, password):
         # Initialize feedback
@@ -306,7 +329,9 @@ class PasswordCheckerApp(ctk.CTk):
             # Heat death of the universe: ~1e100 years in seconds
             heat_death_seconds = Decimal("1e100") * Decimal(31536000)
 
-            if seconds_to_crack > heat_death_seconds:
+            if seconds_to_crack > 100 * heat_death_seconds:  # If it takes longer than the heat death of the universe 100 times over
+                time_to_crack = "Longer than the heat death of the universe! 100 times over! Probably pretty secure."
+            elif seconds_to_crack > heat_death_seconds:
                 time_to_crack = "Longer than the heat death of the universe! Probably pretty secure."
             elif seconds_to_crack < 60:
                 time_to_crack = f"{seconds_to_crack:.2f} seconds"
@@ -336,16 +361,34 @@ class PasswordCheckerApp(ctk.CTk):
         self.clipboard_clear()
         self.clipboard_append(password)
 
-    # Checks if the password is in a public GitHub list of common passwords
+    def get_password_list(self): 
+        #Download the password list once and cache it locally.
+        cache_file = "common_passwords.txt"
+        github_url = "https://raw.githubusercontent.com/danielmiessler/SecLists/master/Passwords/Common-Credentials/xato-net-10-million-passwords-100000.txt"
+
+        # Download the passwords file if not cached
+        if not os.path.exists(cache_file):
+            try:
+                with urllib.request.urlopen(github_url) as response, open(cache_file, "wb") as out_file:
+                    out_file.write(response.read())
+            except Exception as e:
+                print(f"Error downloading password list: {e}")
+                return None
+        return cache_file
+
     def is_password_in_github_list(self, password):
-        RAW_GITHUB_URL = "https://raw.githubusercontent.com/danielmiessler/SecLists/refs/heads/master/Passwords/Common-Credentials/xato-net-10-million-passwords-100000.txt"
+        # Check if the password is in the cached GitHub list.
+        cache_file = self.get_password_list()
+        if not cache_file:
+            return False  # Could not download or access the file
+
         try:
-            with urllib.request.urlopen(RAW_GITHUB_URL) as response:
-                for line in response:
-                    if password.strip() == line.decode('utf-8').strip():
+            with open(cache_file, "r", encoding="utf-8", errors="ignore") as f:
+                for line in f:
+                    if password.strip() == line.strip():
                         return True
-        except Exception as i:
-            print(f"Error checking GitHub password list: {i}")
+        except Exception as e:
+            print(f"Error reading cached password list: {e}")
         return False
 
     def validate_no_whitespace(self, new_value):
@@ -355,7 +398,7 @@ class PasswordCheckerApp(ctk.CTk):
 
 if __name__ == "__main__":
     os.system('cls||clear')  # Clear the console even for stupid macs
-    print("\u001b[31;1mLook at the GUI, not the console.") # Colour in the console
+    print("\u001b[31;1mLook at the GUI, not the console.") # Colours in the console
     print("\u001b[34m\u001b[0m", end="") 
     app = PasswordCheckerApp()
     app.mainloop()
