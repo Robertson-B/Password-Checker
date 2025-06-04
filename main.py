@@ -43,6 +43,12 @@ class PasswordCheckerApp(ctk.CTk):
         # Create widgets
         self.create_widgets()
 
+        # Konami code variables
+        self.konami_progress = ""
+        self.konami_code = "upupdowndownleftrightleftrightba"
+
+        self.bind_all("<Key>", self.konami_key_listener)
+
     def create_widgets(self):
         # Decorative header
         self.header_frame = ctk.CTkFrame(self, fg_color=COLORS["header"], corner_radius=0)
@@ -195,6 +201,18 @@ class PasswordCheckerApp(ctk.CTk):
         )
         self.about_button.place(relx=1.0, rely=1.0, anchor="se", x=-170, y=-20)  # 150px left of Help
 
+        # Hidden button (not packed by default)
+        self.hidden_button = ctk.CTkButton(
+            self,
+            text="Secret Button",
+            font=("Helvetica", 14),
+            fg_color="#FF69B4",
+            hover_color="#C71585",
+            corner_radius=10,
+            command=self.secret_easter_egg,
+        )
+        # Do NOT pack/place yet!
+
     def open_help_window(self):
         if hasattr(self, "help_win") and self.help_win.winfo_exists(): # Why is this the only way to check if a window exists?
             self.help_win.lift()
@@ -289,7 +307,7 @@ class PasswordCheckerApp(ctk.CTk):
         password = self.password_entry.get()
 
         # Easter egg for specific passwords
-        if password.lower() in ["fong", "fongy",]:
+        if password.lower() in ["fong", "fongy", "mrfong"]:
             self.result_label.configure(text="Terrible", text_color="#FF5252")  # Red for bad passwords
             self.feedback_label.configure(text="That's a crap password Fong! Try something more original!")
             self.time_to_crack_label.configure(text="")
@@ -329,6 +347,25 @@ class PasswordCheckerApp(ctk.CTk):
         elif self.is_password_in_github_list(password): # Check against GitHub password list
             self.result_label.configure(text="Common", text_color="#FF5252")
             self.feedback_label.configure(text="This password appears in a public list and is really common. Choose another one!")
+            self.time_to_crack_label.configure(text="")
+            self.pwned_count_label.configure(text="")
+            return
+        # Palindrome password easter egg
+        elif password and password.lower() == password.lower()[::-1] and len(password) > 2:
+            self.result_label.configure(text="Palindrome!", text_color="#FFC107")
+            self.feedback_label.configure(text="Cool, your password is a palindrome!")
+            self.time_to_crack_label.configure(text="")
+            self.pwned_count_label.configure(text="")
+            return
+        elif password.lower() == "maytheforcebewithyou":
+            self.result_label.configure(text="Star Wars!", text_color="#FFC107")
+            self.feedback_label.configure(text="The Force is strong with you, but not this password.")
+            self.time_to_crack_label.configure(text="")
+            self.pwned_count_label.configure(text="")
+            return
+        elif password.lower() == "iloveyou3000":
+            self.result_label.configure(text="Iron Man!", text_color="#FFC107")
+            self.feedback_label.configure(text="Iron Man approves, but hackers do too!")
             self.time_to_crack_label.configure(text="")
             self.pwned_count_label.configure(text="")
             return
@@ -465,6 +502,36 @@ class PasswordCheckerApp(ctk.CTk):
                 return False
         return True
 
+    def konami_key_listener(self, event):
+        # Map keys to the konami code sequence
+        key_map = {
+            "Up": "up",
+            "Down": "down",
+            "Left": "left",
+            "Right": "right",
+            "b": "b",
+            "a": "a"
+        }
+        if event.keysym in key_map:
+            self.konami_progress += key_map[event.keysym]
+            # Keep only the last N chars
+            if len(self.konami_progress) > len(self.konami_code):
+                self.konami_progress = self.konami_progress[-len(self.konami_code):]
+            if self.konami_progress == self.konami_code:
+                self.show_hidden_button()
+                self.konami_progress = ""  # Reset after success
+        else:
+            self.konami_progress = ""  # Reset on wrong key
+
+    def show_hidden_button(self):
+        # Place the hidden button at the bottom left
+        self.hidden_button.place(relx=0.0, rely=1.0, anchor="sw", x=20, y=-20)
+
+    def secret_easter_egg(self):
+        self.result_label.configure(text="🎉 Easter egg Unlocked! 🎉", text_color="#FF69B4")
+        self.feedback_label.configure(text="You found Halliday's egg! shame my game company is not as good as his. And i'm not giving it to anyone, let alone you.")
+        self.time_to_crack_label.configure(text="")
+        self.pwned_count_label.configure(text="")
 
 if __name__ == "__main__":
     os.system('cls||clear')  # Clear the console even for stupid macs
