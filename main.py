@@ -594,6 +594,7 @@ class PasswordCheckerApp(ctk.CTk):
             self.generate_button.configure(fg_color="#4CAF50", hover_color="#388E3C")
             self.copy_button.configure(fg_color="#FFA500", hover_color="#CC8400")
             self.secret_theme_on = True
+            self.check_password_strength()  # Re-check the password strength to update colors
         else:
             ctk.set_appearance_mode("light")
             self.header_frame.configure(fg_color=COLORS["header"])
@@ -609,6 +610,7 @@ class PasswordCheckerApp(ctk.CTk):
             self.generate_button.configure(fg_color="#4CAF50", hover_color="#388E3C")
             self.copy_button.configure(fg_color="#FFA500", hover_color="#CC8400")
             self.secret_theme_on = False
+            self.check_password_strength()  # Re-check the password strength to update colors
 
     def show_random_joke(self):
         import random
