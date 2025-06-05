@@ -9,6 +9,7 @@ import urllib.request # For checking if the password is in a public GitHub list 
 import webbrowser # For easter eggs
 import pwnedpass # For checking if the password has been pwned in data breaches
 
+
 # Define a modern color palette for the app
 COLORS = {
     "background": "#F0F4F8",  # Light blue-gray
@@ -48,6 +49,10 @@ class PasswordCheckerApp(ctk.CTk):
         self.konami_code = "upupdowndownleftrightleftrightba"
 
         self.bind_all("<Key>", self.konami_key_listener)
+        self.bind_all("<Escape>", self.show_self_destruct_button)
+
+        self.secret_theme_on = False
+
 
     def create_widgets(self):
         # Decorative header
@@ -213,6 +218,37 @@ class PasswordCheckerApp(ctk.CTk):
         )
         # Do NOT pack/place yet!
 
+        # Tiny random joke button in the bottom right corner
+        self.joke_button = ctk.CTkButton(
+            self,
+            text=".",
+            width=10,
+            height=10,
+            fg_color="#FFFFFF",
+            hover_color="#DDDDDD",
+            text_color="#FFFFFF",
+            border_width=0,
+            corner_radius=5,
+            command=self.show_random_joke,
+        )
+        self.joke_button.place(relx=1.0, rely=1.0, anchor="se", x=-5, y=-5)
+
+        # Secret colour swap
+        self.header_label.bind("<Double-Button-1>", self.toggle_secret_theme)
+
+        # Self-destruct button (hidden by default)
+        self.self_destruct_button = ctk.CTkButton(
+            self,
+            text="Self-Destruct",
+            font=("Helvetica", 14, "bold"),
+            fg_color="#FF0000",
+            hover_color="#880000",
+            text_color="#FFFFFF",
+            corner_radius=10,
+            command=self.self_destruct_sequence,
+        )
+        # Do NOT pack/place yet!
+
     def open_help_window(self):
         if hasattr(self, "help_win") and self.help_win.winfo_exists(): # Why is this the only way to check if a window exists?
             self.help_win.lift()
@@ -306,8 +342,15 @@ class PasswordCheckerApp(ctk.CTk):
     def check_password_strength(self):
         password = self.password_entry.get()
 
+        if not password:
+            self.result_label.configure(text="No Password Entered", text_color="#FF5252")
+            self.feedback_label.configure(text="Please enter a password to check its strength.")
+            self.time_to_crack_label.configure(text="")
+            self.pwned_count_label.configure(text="")
+            return
+        
         # Easter egg for specific passwords
-        if password.lower() in ["fong", "fongy", "mrfong"]:
+        elif password.lower() in ["fong", "fongy", "mrfong"]:
             self.result_label.configure(text="Terrible", text_color="#FF5252")  # Red for bad passwords
             self.feedback_label.configure(text="That's a crap password Fong! Try something more original!")
             self.time_to_crack_label.configure(text="")
@@ -502,6 +545,7 @@ class PasswordCheckerApp(ctk.CTk):
                 return False
         return True
 
+    # Secret buttons also happens to be a fully functional key logger, but i dont really want to know what you type.
     def konami_key_listener(self, event):
         # Map keys to the konami code sequence
         key_map = {
@@ -524,14 +568,92 @@ class PasswordCheckerApp(ctk.CTk):
             self.konami_progress = ""  # Reset on wrong key
 
     def show_hidden_button(self):
-        # Place the hidden button at the bottom left
-        self.hidden_button.place(relx=0.0, rely=1.0, anchor="sw", x=20, y=-20)
+        # Place the hidden button next to the self-destruct button at the bottom right
+        self.hidden_button.place(relx=1.0, rely=1.0, anchor="se", x=-470, y=-20)
 
     def secret_easter_egg(self):
-        self.result_label.configure(text="🎉 Easter egg Unlocked! 🎉", text_color="#FF69B4")
-        self.feedback_label.configure(text="You found Halliday's egg! shame my game company is not as good as his. And i'm not giving it to anyone, let alone you.")
+        self.result_label.configure(text="🎉 Golden egg Unlocked! 🎉", text_color="#FFD700")
+        self.feedback_label.configure(text="You found Halliday's egg! Shame my game company is not as good as his. And i'm not giving it to anyone, let alone you.")
         self.time_to_crack_label.configure(text="")
         self.pwned_count_label.configure(text="")
+
+    def toggle_secret_theme(self, event=None):
+        # Toggle a secret dark theme on double-clicking the header
+        if not self.secret_theme_on:
+            ctk.set_appearance_mode("dark")
+            self.header_frame.configure(fg_color="#333333")
+            self.header_label.configure(text_color="#FFFFFF")
+            self.sub_header_label.configure(text_color="#DDDDDD")
+            self.card_frame.configure(fg_color="#444444", border_color="#555555")
+            self.password_entry.configure(fg_color="#555555", border_color="#666666", text_color="#FFFFFF")
+            self.result_label.configure(text_color="#FFFFFF")
+            self.feedback_label.configure(text_color="#CCCCCC")
+            self.time_to_crack_label.configure(text_color="#CCCCCC")
+            self.pwned_count_label.configure(text_color="#FFCCCC")
+            self.check_button.configure(fg_color="#0078D7", hover_color="#005A9E")
+            self.generate_button.configure(fg_color="#4CAF50", hover_color="#388E3C")
+            self.copy_button.configure(fg_color="#FFA500", hover_color="#CC8400")
+            self.secret_theme_on = True
+        else:
+            ctk.set_appearance_mode("light")
+            self.header_frame.configure(fg_color=COLORS["header"])
+            self.header_label.configure(text_color="#FFFFFF")
+            self.sub_header_label.configure(text_color=COLORS["text_primary"])
+            self.card_frame.configure(fg_color=COLORS["card_bg"], border_color=COLORS["card_border"])
+            self.password_entry.configure(fg_color=COLORS["entry_bg"], border_color=COLORS["entry_border"], text_color="#000000")
+            self.result_label.configure(text_color=COLORS["text_primary"])
+            self.feedback_label.configure(text_color=COLORS["text_secondary"])
+            self.time_to_crack_label.configure(text_color=COLORS["text_secondary"])
+            self.pwned_count_label.configure(text_color="#FF5252")
+            self.check_button.configure(fg_color=COLORS["button"], hover_color=COLORS["button_hover"])
+            self.generate_button.configure(fg_color="#4CAF50", hover_color="#388E3C")
+            self.copy_button.configure(fg_color="#FFA500", hover_color="#CC8400")
+            self.secret_theme_on = False
+
+    def show_random_joke(self):
+        import random
+        jokes = [
+            "Why do programmers prefer dark mode?\nBecause light attracts bugs!",
+            "A SQL query walks into a bar, walks up to two tables and asks:\n'Can I join you?'",
+            "Why do Java developers wear glasses?\nBecause they don't see sharp.",
+            "There are 10 types of people in the world:\nThose who understand binary and those who don't.",
+            "How many programmers does it take to change a light bulb?\nNone, that's a hardware problem.",
+            "I would tell you a UDP joke, but you might not get it.",
+            "To understand recursion, you must first understand recursion.",
+            "Why was the developer unhappy at their job?\nThey wanted arrays.",
+            "What's a programmer's favorite hangout place?\nThe Foo Bar.",
+            "Why did the Python programmer have so many friends?\nBecause they were very open-sourced."
+        ]
+        joke = random.choice(jokes)
+        popup = ctk.CTkToplevel(self)
+        popup.title("Random Programming Joke")
+        popup.geometry("350x160")
+        popup.resizable(False, False)
+        label = ctk.CTkLabel(popup, text=joke, font=("Helvetica", 13), justify="center", wraplength=320)
+        label.pack(expand=True, fill="both", padx=15, pady=15)
+        popup.attributes("-topmost", True)
+        popup.lift()
+
+    def show_self_destruct_button(self, event=None):
+        # Place the self-destruct button at the bottom right, aligned with the other buttons
+        self.self_destruct_button.place(relx=1.0, rely=1.0, anchor="se", x=-320, y=-20)
+
+    def self_destruct_sequence(self):
+        popup = ctk.CTkToplevel(self)
+        popup.title("Self-Destruct Sequence")
+        popup.geometry("350x120")
+        popup.resizable(False, False)
+        label = ctk.CTkLabel(
+            popup,
+            text="💥 BOOM! The app will now self-destruct! 💥",
+            font=("Helvetica", 15, "bold"),
+            justify="center",
+            text_color="#FF0000"
+        )
+        label.pack(expand=True, fill="both", padx=15, pady=15)
+        popup.attributes("-topmost", True)
+        popup.lift()
+        self.after(2000, self.destroy)  # Close the app after 2 seconds
 
 if __name__ == "__main__":
     os.system('cls||clear')  # Clear the console even for stupid macs
