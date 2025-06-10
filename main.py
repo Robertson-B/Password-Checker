@@ -18,6 +18,7 @@ COLORS = {
     "text_secondary": "#555555",  # Subtle gray
     "button": "#0078D7",  # Blue
     "button_hover": "#005A9E",  # Darker blue
+    "button_border": "#313B6E", # Dark blue for button borders
     "entry_bg": "#FFFFFF",  # White
     "entry_border": "#CCCCCC",  # Light gray
     "card_bg": "#FFFFFF",  # White for card-like frames
@@ -50,6 +51,7 @@ class PasswordCheckerApp(ctk.CTk):
 
         self.bind_all("<Key>", self.konami_key_listener)
         self.bind_all("<Escape>", self.show_self_destruct_button)
+        self.bind_all("<Control-Alt-d>", self.show_dev_area_button)
 
         self.secret_theme_on = False
 
@@ -109,6 +111,7 @@ class PasswordCheckerApp(ctk.CTk):
             fg_color=COLORS["button"],
             hover_color=COLORS["button_hover"],
             corner_radius=10,
+            border_color=COLORS["button_border"],
             command=self.check_password_strength,
         )
         self.check_button.pack(pady=10)
@@ -121,6 +124,7 @@ class PasswordCheckerApp(ctk.CTk):
             fg_color="#4CAF50",  # Green button for generating passwords
             hover_color="#388E3C",  # Darker green on hover
             corner_radius=10,
+            border_color=COLORS["button_border"],
             command=self.generate_secure_password,
         )
         self.generate_button.pack(pady=10)
@@ -133,6 +137,7 @@ class PasswordCheckerApp(ctk.CTk):
             fg_color="#FFA500",  # Orange button for copy
             hover_color="#CC8400",  # Darker orange on hover
             corner_radius=10,
+            border_color=COLORS["button_border"],
             command=self.copy_password_to_clipboard,
         )
         self.copy_button.pack(pady=10)
@@ -206,7 +211,7 @@ class PasswordCheckerApp(ctk.CTk):
         )
         self.about_button.place(relx=1.0, rely=1.0, anchor="se", x=-170, y=-20)  # 150px left of Help
 
-        # Hidden button (not packed by default)
+        # Hidden button (not packed by default) for Easter egg
         self.hidden_button = ctk.CTkButton(
             self,
             text="Secret Button",
@@ -214,7 +219,7 @@ class PasswordCheckerApp(ctk.CTk):
             fg_color="#FF69B4",
             hover_color="#C71585",
             corner_radius=10,
-            command=self.secret_easter_egg,
+            command=self.hallidays_egg,
         )
         # Do NOT pack/place yet!
 
@@ -246,6 +251,19 @@ class PasswordCheckerApp(ctk.CTk):
             text_color="#FFFFFF",
             corner_radius=10,
             command=self.self_destruct_sequence,
+        )
+        # Do NOT pack/place yet!
+
+        # Developer area button (not packed by default)
+        self.dev_area_button = ctk.CTkButton(
+            self,
+            text="Dev Area",
+            font=("Helvetica", 14, "bold"),
+            fg_color="#222831",
+            hover_color="#005A9E",
+            text_color="#FFFFFF",
+            corner_radius=10,
+            command=self.open_dev_area_quiz,
         )
         # Do NOT pack/place yet!
 
@@ -571,7 +589,7 @@ class PasswordCheckerApp(ctk.CTk):
         # Place the hidden button next to the self-destruct button at the bottom right
         self.hidden_button.place(relx=1.0, rely=1.0, anchor="se", x=-470, y=-20)
 
-    def secret_easter_egg(self):
+    def hallidays_egg(self):
         self.result_label.configure(text="🎉 Golden egg Unlocked! 🎉", text_color="#FFD700")
         self.feedback_label.configure(text="You found Halliday's egg! Shame my game company is not as good as his. And i'm not giving it to anyone, let alone you.")
         self.time_to_crack_label.configure(text="")
@@ -657,9 +675,110 @@ class PasswordCheckerApp(ctk.CTk):
         popup.lift()
         self.after(2000, self.destroy)  # Close the app after 2 seconds
 
+    def open_dev_area_quiz(self):
+        # List of (question, answer) pairs
+        
+        if hasattr(self, "quiz_popup") and self.quiz_popup.winfo_exists():
+            self.quiz_popup.lift()
+            self.quiz_popup.attributes("-topmost", True)
+            self.quiz_popup.focus_force()
+            return
+
+        questions = [
+            ("What is the greatest sci-fi book ever written", "dune"),
+            ("What game studio made this program", "bitrealm games"),
+            ("What is the first name of the developer?", "benjamin"),
+            ("What is the answer to life, the universe, and everything?", "42"),
+            ("how many easter eggs are in this app?", "too many"),
+            ("what is the greatest premier league team of all time?", "tottenham hotspur"),
+            ("What is the last name of the developer?", "robertson"),
+            ("What is the secret code?", "upupdowndownleftrightleftrightba"),
+            ("What is the greatest game ever made?", "horizon forbidden west"),
+            ("Who is the greatest software teacher of all time?", "Fong")
+        ]
+        self.quiz_index = 0
+        self.quiz_score = 0
+        self.quiz_questions = questions
+        self.quiz_popup = ctk.CTkToplevel(self)
+        self.quiz_popup.title("Dev Area Security Quiz")
+        self.quiz_popup.geometry("400x200")
+        self.quiz_popup.resizable(False, False)
+        self.quiz_label = ctk.CTkLabel(self.quiz_popup, text=questions[0][0], font=("Helvetica", 13), wraplength=380)
+        self.quiz_label.pack(pady=(20, 10))
+        self.quiz_entry = ctk.CTkEntry(self.quiz_popup, font=("Helvetica", 13))
+        self.quiz_entry.pack(pady=(0, 10))
+        self.quiz_entry.bind("<Return>", self.check_quiz_answer)
+        self.quiz_feedback = ctk.CTkLabel(self.quiz_popup, text="", font=("Helvetica", 11), text_color="#FF5252")
+        self.quiz_feedback.pack()
+        self.quiz_popup.attributes("-topmost", True)
+        self.quiz_popup.lift()
+
+
+    def check_quiz_answer(self, event=None):
+        answer = self.quiz_entry.get()
+        correct = self.quiz_questions[self.quiz_index][1]
+        if re.sub(r"\s+", "", answer).lower() == re.sub(r"\s+", "", correct).lower(): # Ignore whitespace and case
+            self.quiz_score += 1
+        self.quiz_index += 1
+        if self.quiz_index < len(self.quiz_questions):
+            self.quiz_label.configure(text=self.quiz_questions[self.quiz_index][0])
+            self.quiz_entry.delete(0, "end")
+        else:
+            self.quiz_popup.destroy()
+            if self.quiz_score == len(self.quiz_questions):
+                self.open_dev_area()
+            else:
+                popup = ctk.CTkToplevel(self)
+                popup.title("Access Denied")
+                popup.geometry("300x100")
+                label = ctk.CTkLabel(popup, text="You did not answer all questions correctly.", font=("Helvetica", 13))
+                label.pack(expand=True, fill="both", padx=15, pady=15)
+                popup.attributes("-topmost", True)
+                popup.lift()
+
+    def open_dev_area(self):
+        secrets = [ # Stop cheating and looking at the code!
+            "Secret passwords:"
+            "Konami code: upupdowndownleftrightleftrightba",
+            "Rickroll: nevergonnagiveyouup",
+            "Palindrome password: any palindrome",
+            "Star Wars: maytheforcebewithyou",
+            "Iron Man: iloveyou3000",
+            "Leet speak: 1337, h4x0r, leet, l33t, hacker, h4cker",
+            "sneaky password: drowssap",
+            "Imposter: bitrealm, bitrealmgames, robertson, brobertson,\n    bean, ben, benjamin",
+            "Fong's passwords: fong, fongy, mrfong\n",
+            "Secret buttons:",
+            "Random Joke: tiny dot button in bottom right corner",
+            "Dark mode: double-click the header\n",
+            "Secret commands",
+            "Halliday's Egg: Up Up Down Down Left Right Left Right B A",
+            "Self-Destruct: Escape key\n",
+            "Thanks you for using this app!"
+        ]
+        popup = ctk.CTkToplevel(self)
+        popup.title("Developer Area - All Secrets")
+        popup.geometry("500x400")
+        popup.resizable(False, False)
+        label = ctk.CTkLabel(
+            popup,
+            text="Welcome to the Developer Area! Here are some secrets and easter eggs:\n\n" + "\n".join(f"- {s}" for s in secrets),
+            font=("Helvetica", 13),
+            justify="left",
+            wraplength=480
+        )
+        label.pack(expand=True, fill="both", padx=20, pady=20)
+        popup.attributes("-topmost", True)
+        popup.lift()
+
+    def show_dev_area_button(self, event=None):
+        # Place the dev area button at the bottom left
+        self.dev_area_button.place(relx=0.0, rely=1.0, anchor="sw", x=20, y=-20)
+
 if __name__ == "__main__":
     os.system('cls||clear')  # Clear the console even for stupid macs
     print("\u001b[31;1mLook at the GUI, not the console.") # Colours in the console
     print("\u001b[34m\u001b[0m", end="") 
     app = PasswordCheckerApp()
     app.mainloop()
+    
