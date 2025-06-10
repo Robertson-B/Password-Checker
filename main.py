@@ -12,17 +12,19 @@ import pwnedpass # For checking if the password has been pwned in data breaches
 
 # Define a modern color palette for the app
 COLORS = {
-    "background": "#F0F4F8",  # Light blue-gray
-    "header": "#005A9E",  # Deep blue
-    "text_primary": "#333333",  # Dark gray
-    "text_secondary": "#555555",  # Subtle gray
-    "button": "#0078D7",  # Blue
-    "button_hover": "#005A9E",  # Darker blue
-    "button_border": "#313B6E", # Dark blue for button borders
-    "entry_bg": "#FFFFFF",  # White
-    "entry_border": "#CCCCCC",  # Light gray
-    "card_bg": "#FFFFFF",  # White for card-like frames
-    "card_border": "#E0E0E0",  # Light gray for card borders
+    "background": "#F0F4F8",  
+    "header": "#005A9E", 
+    "text_primary": "#333333",  
+    "text_secondary": "#555555",  
+    "button": "#0078D7",  
+    "button_hover": "#005A9E",  
+    "button_border": "#313B6E", 
+    "entry_bg": "#FFFFFF",  
+    "entry_border": "#CCCCCC",  
+    "card_bg": "#FFFFFF",  
+    "window_bg": "#565c99",
+    "card_border": "#E0E0E0",  
+    "button_border": "#313B6E",
 }
 
 # Define allowed characters for password input
@@ -40,7 +42,7 @@ class PasswordCheckerApp(ctk.CTk):
 
         # Set light mode and custom theme
         ctk.set_appearance_mode("light") # Dark mode is for losers
-        ctk.set_default_color_theme("MoonlitSky.json")  # Use the custom theme for redundancy in case i forgot to set custom colours
+
 
         # Create widgets
         self.create_widgets()
@@ -48,16 +50,15 @@ class PasswordCheckerApp(ctk.CTk):
         # Konami code variables
         self.konami_progress = ""
         self.konami_code = "upupdowndownleftrightleftrightba"
+        # Developer access code variables
+        self.dev_code_progress = ""
+        self.dev_code = "bitrealm"
 
         self.bind_all("<Key>", self.konami_key_listener)
         self.bind_all("<Escape>", self.show_self_destruct_button)
 
-
         self.secret_theme_on = False
 
-        # Developer access code variables
-        self.dev_code_progress = ""
-        self.dev_code = "bitrealm"
 
 
     def create_widgets(self):
@@ -115,6 +116,7 @@ class PasswordCheckerApp(ctk.CTk):
             fg_color=COLORS["button"],
             hover_color=COLORS["button_hover"],
             corner_radius=10,
+            border_width=2,
             border_color=COLORS["button_border"],
             command=self.check_password_strength,
         )
@@ -128,6 +130,7 @@ class PasswordCheckerApp(ctk.CTk):
             fg_color="#4CAF50",  # Green button for generating passwords
             hover_color="#388E3C",  # Darker green on hover
             corner_radius=10,
+            border_width=2,
             border_color=COLORS["button_border"],
             command=self.generate_secure_password,
         )
@@ -141,6 +144,7 @@ class PasswordCheckerApp(ctk.CTk):
             fg_color="#FFA500",  # Orange button for copy
             hover_color="#CC8400",  # Darker orange on hover
             corner_radius=10,
+            border_width=2,
             border_color=COLORS["button_border"],
             command=self.copy_password_to_clipboard,
         )
@@ -199,6 +203,8 @@ class PasswordCheckerApp(ctk.CTk):
             fg_color="#888888",
             hover_color="#555555",
             corner_radius=10,
+            border_width=2,
+            border_color=COLORS["button_border"],
             command=self.open_help_window,
         )
         self.help_button.place(relx=1.0, rely=1.0, anchor="se", x=-20, y=-20)
@@ -211,6 +217,8 @@ class PasswordCheckerApp(ctk.CTk):
             fg_color="#888888",
             hover_color="#555555",
             corner_radius=10,
+            border_width=2,
+            border_color=COLORS["button_border"],
             command=self.open_about_window,
         )
         self.about_button.place(relx=1.0, rely=1.0, anchor="se", x=-170, y=-20)  # 150px left of Help
@@ -223,6 +231,8 @@ class PasswordCheckerApp(ctk.CTk):
             fg_color="#FF69B4",
             hover_color="#C71585",
             corner_radius=10,
+            border_width=2,
+            border_color=COLORS["button_border"],
             command=self.hallidays_egg,
         )
         # Do NOT pack/place yet!
@@ -254,6 +264,8 @@ class PasswordCheckerApp(ctk.CTk):
             hover_color="#880000",
             text_color="#FFFFFF",
             corner_radius=10,
+            border_width=2,
+            border_color=COLORS["button_border"],
             command=self.self_destruct_sequence,
         )
         # Do NOT pack/place yet!
@@ -267,6 +279,8 @@ class PasswordCheckerApp(ctk.CTk):
             hover_color="#005A9E",
             text_color="#FFFFFF",
             corner_radius=10,
+            border_width=2,
+            border_color=COLORS["button_border"],
             command=self.open_dev_area_quiz,
         )
         # Do NOT pack/place yet!
@@ -280,6 +294,7 @@ class PasswordCheckerApp(ctk.CTk):
         self.help_win.title("Help")
         self.help_win.geometry("400x300")
         self.help_win.resizable(False, False)
+        self.help_win.configure(fg_color=COLORS["window_bg"])
         help_label = ctk.CTkLabel(
             self.help_win,
             text=(
@@ -295,6 +310,7 @@ class PasswordCheckerApp(ctk.CTk):
             font=("Helvetica", 13),
             wraplength=380,
             justify="left",
+            text_color="#FFFFFF"
         )
         help_label.pack(padx=20, pady=20)
         self.help_win.attributes("-topmost", True)
@@ -309,6 +325,7 @@ class PasswordCheckerApp(ctk.CTk):
         self.about_win.title("About the Developer")
         self.about_win.geometry("400x240")
         self.about_win.resizable(False, False)
+        self.about_win.configure(fg_color=COLORS["window_bg"])
 
         about_text = (
             "Password Checker\n"
@@ -323,6 +340,7 @@ class PasswordCheckerApp(ctk.CTk):
             font=("Helvetica", 13),
             wraplength=380,
             justify="left",
+            text_color="#FFFFFF"
         )
         about_label.pack(padx=20, pady=(20, 5))
 
@@ -453,9 +471,10 @@ class PasswordCheckerApp(ctk.CTk):
                     text_color="#FF5252"  # Red for breached
                 )
             else:
+                color = COLORS["text_secondary"] if not self.secret_theme_on else "#CCCCCC" # Have to do it this way because you can't use an if statement in a function call.
                 self.pwned_count_label.configure(
                     text="This password has not been found in any known data breaches.",
-                    text_color=COLORS["text_secondary"]  # Neutral color for safe
+                    text_color=color
                 )
 
     def evaluate_password(self, password):
@@ -589,7 +608,7 @@ class PasswordCheckerApp(ctk.CTk):
         else:
             self.konami_progress = ""
 
-        # For dev area button\
+        # For dev area button
         if event.char.isalnum():
             self.dev_code_progress += event.char.lower()
             if len(self.dev_code_progress) > len(self.dev_code):
@@ -664,6 +683,8 @@ class PasswordCheckerApp(ctk.CTk):
         popup.title("Random Programming Joke")
         popup.geometry("350x160")
         popup.resizable(False, False)
+        popup.configure(fg_color=COLORS["window_bg"])
+        popup.configure(text_color= "#FFFFFF")
         label = ctk.CTkLabel(popup, text=joke, font=("Helvetica", 13), justify="center", wraplength=320)
         label.pack(expand=True, fill="both", padx=15, pady=15)
         popup.attributes("-topmost", True)
@@ -678,6 +699,7 @@ class PasswordCheckerApp(ctk.CTk):
         popup.title("Self-Destruct Sequence")
         popup.geometry("350x120")
         popup.resizable(False, False)
+        popup.configure(fg_color=COLORS["window_bg"])
         label = ctk.CTkLabel(
             popup,
             text="💥 BOOM! The app will now self-destruct! 💥",
@@ -718,9 +740,10 @@ class PasswordCheckerApp(ctk.CTk):
         self.quiz_popup.title("Dev Area Security Quiz")
         self.quiz_popup.geometry("400x200")
         self.quiz_popup.resizable(False, False)
-        self.quiz_label = ctk.CTkLabel(self.quiz_popup, text=questions[0][0], font=("Helvetica", 13), wraplength=380)
+        self.quiz_popup.configure(fg_color=COLORS["window_bg"])
+        self.quiz_label = ctk.CTkLabel(self.quiz_popup, text=questions[0][0], font=("Helvetica", 13), wraplength=380, text_color= "#FFFFFF")
         self.quiz_label.pack(pady=(20, 10))
-        self.quiz_entry = ctk.CTkEntry(self.quiz_popup, font=("Helvetica", 13))
+        self.quiz_entry = ctk.CTkEntry(self.quiz_popup, font=("Helvetica", 13), text_color= "#000000")
         self.quiz_entry.pack(pady=(0, 10))
         self.quiz_entry.bind("<Return>", self.check_quiz_answer)
         self.quiz_feedback = ctk.CTkLabel(self.quiz_popup, text="", font=("Helvetica", 11), text_color="#FF5252")
@@ -746,9 +769,10 @@ class PasswordCheckerApp(ctk.CTk):
                 popup = ctk.CTkToplevel(self)
                 popup.title("Access Denied")
                 popup.geometry("300x100")
-                label = ctk.CTkLabel(popup, text="You did not answer all questions correctly.", font=("Helvetica", 13))
+                label = ctk.CTkLabel(popup, text="You did not answer all questions correctly.", font=("Helvetica", 13), text_color= "#FFFFFF")
                 label.pack(expand=True, fill="both", padx=15, pady=15)
                 popup.attributes("-topmost", True)
+                popup.configure(fg_color=COLORS["window_bg"])
                 popup.lift()
 
     def open_dev_area(self):
@@ -775,12 +799,14 @@ class PasswordCheckerApp(ctk.CTk):
         popup.title("Developer Area - All Secrets")
         popup.geometry("500x400")
         popup.resizable(False, False)
+        popup.configure(fg_color=COLORS["window_bg"])
         label = ctk.CTkLabel(
             popup,
             text="Welcome to the Developer Area! Here are some secrets and easter eggs:\n\n" + "\n".join(f"- {s}" for s in secrets),
             font=("Helvetica", 13),
             justify="left",
-            wraplength=480
+            wraplength=480,
+            text_color= "#FFFFFF"
         )
         label.pack(expand=True, fill="both", padx=20, pady=20)
         popup.attributes("-topmost", True)
