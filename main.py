@@ -51,9 +51,13 @@ class PasswordCheckerApp(ctk.CTk):
 
         self.bind_all("<Key>", self.konami_key_listener)
         self.bind_all("<Escape>", self.show_self_destruct_button)
-        self.bind_all("<Control-Alt-d>", self.show_dev_area_button)
+
 
         self.secret_theme_on = False
+
+        # Developer access code variables
+        self.dev_code_progress = ""
+        self.dev_code = "bitrealm"
 
 
     def create_widgets(self):
@@ -574,16 +578,27 @@ class PasswordCheckerApp(ctk.CTk):
             "b": "b",
             "a": "a"
         }
+        # For secret button (Konami code)
         if event.keysym in key_map:
             self.konami_progress += key_map[event.keysym]
-            # Keep only the last N chars
             if len(self.konami_progress) > len(self.konami_code):
                 self.konami_progress = self.konami_progress[-len(self.konami_code):]
             if self.konami_progress == self.konami_code:
                 self.show_hidden_button()
-                self.konami_progress = ""  # Reset after success
+                self.konami_progress = ""
         else:
-            self.konami_progress = ""  # Reset on wrong key
+            self.konami_progress = ""
+
+        # For dev area button\
+        if event.char.isalnum():
+            self.dev_code_progress += event.char.lower()
+            if len(self.dev_code_progress) > len(self.dev_code):
+                self.dev_code_progress = self.dev_code_progress[-len(self.dev_code):]
+            if self.dev_code_progress == self.dev_code:
+                self.show_dev_area_button()
+                self.dev_code_progress = ""
+        else:
+            self.dev_code_progress = ""
 
     def show_hidden_button(self):
         # Place the hidden button next to the self-destruct button at the bottom right
@@ -781,4 +796,3 @@ if __name__ == "__main__":
     print("\u001b[34m\u001b[0m", end="") 
     app = PasswordCheckerApp()
     app.mainloop()
-    
