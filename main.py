@@ -31,19 +31,16 @@ COLORS = {
 # Define allowed characters for password input
 ALLOWED_PASSWORD_CHARS = string.ascii_letters + string.digits + "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
 
-class PasswordCheckerApp(ctk.CTk):
+class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
     def __init__(self):
         super().__init__()
 
         # Configure the window
         self.title("Password Strength Checker")
-        self.geometry("800x600")  # Large window size
+        self.geometry("800x600") 
         self.resizable(False, False)
         self.configure(bg=COLORS["background"])  # Use modern background color
-
-        # Set light mode and custom theme
         ctk.set_appearance_mode("light") # Dark mode is for losers
-
 
         # Create widgets
         self.create_widgets()
@@ -58,7 +55,8 @@ class PasswordCheckerApp(ctk.CTk):
         self.minigame_code_progress = ""
         self.minigame_code = "snakegame"
 
-        self.bind_all("<Key>", self.konami_key_listener)
+        # Bind key events for secret buttons and Easter eggs
+        self.bind_all("<Key>", self.key_listener)
         self.bind_all("<Escape>", self.show_self_destruct_button)
 
         self.secret_theme_on = False
@@ -73,8 +71,8 @@ class PasswordCheckerApp(ctk.CTk):
         self.header_label = ctk.CTkLabel(
             self.header_frame,
             text="🔒 Password Strength Checker 🔒", # Emoji support
-            font=("Helvetica", 30, "bold"),
-            text_color="#FFFFFF",  # White text for contrast
+            font=("Helvetica", 30, "bold"), # Helvetica on top
+            text_color="#FFFFFF",  
         )
         self.header_label.pack(pady=15)
 
@@ -98,7 +96,7 @@ class PasswordCheckerApp(ctk.CTk):
         self.card_frame.pack(pady=(0, 10), padx=20)
 
         # Password entry
-        vcmd = self.register(self.validate_password_input)
+        vcmd = self.register(self.validate_password_input) # Vallidates input in real time
         self.password_entry = ctk.CTkEntry(
             self.card_frame,
             placeholder_text="Enter your password",
@@ -107,8 +105,9 @@ class PasswordCheckerApp(ctk.CTk):
             fg_color=COLORS["entry_bg"],
             border_color=COLORS["entry_border"],
             text_color="#000000",
-            validate="key",
-            validatecommand=(vcmd, "%P"),
+            validate="key", # Validate input on every key press
+            validatecommand=(vcmd, "%P"), # Pass the new value to the validation function
+            # I know it looks like a mess, but this is the only way to validate input in real time in customtkinter.
         )
         self.password_entry.pack(padx=20, pady=20)
 
@@ -131,8 +130,8 @@ class PasswordCheckerApp(ctk.CTk):
             self.card_frame,
             text="Generate Secure Password",
             font=("Helvetica", 16),
-            fg_color="#4CAF50",  # Green button for generating passwords
-            hover_color="#388E3C",  # Darker green on hover
+            fg_color="#4CAF50", 
+            hover_color="#388E3C",  
             corner_radius=10,
             border_width=2,
             border_color=COLORS["button_border"],
@@ -145,8 +144,8 @@ class PasswordCheckerApp(ctk.CTk):
             self.card_frame,
             text="Copy to Clipboard",
             font=("Helvetica", 16),
-            fg_color="#FFA500",  # Orange button for copy
-            hover_color="#CC8400",  # Darker orange on hover
+            fg_color="#FFA500",  
+            hover_color="#CC8400",  
             corner_radius=10,
             border_width=2,
             border_color=COLORS["button_border"],
@@ -160,7 +159,6 @@ class PasswordCheckerApp(ctk.CTk):
             width=400,
             height=16,
             corner_radius=8,
-            progress_color="#FF5252",  # Start as red
         )
         self.strength_bar.set(0.0)
         self.strength_bar.pack(pady=(5, 10))
@@ -195,7 +193,7 @@ class PasswordCheckerApp(ctk.CTk):
             wraplength=600,
             justify="left",
         )
-        self.time_to_crack_label.pack(pady=(0, 0))  # Move up by reducing top padding
+        self.time_to_crack_label.pack(pady=(0, 0))  
 
         # Pwned count label 
         self.pwned_count_label = ctk.CTkLabel(
@@ -206,10 +204,10 @@ class PasswordCheckerApp(ctk.CTk):
             wraplength=600,
             justify="left",
         )
-        self.pwned_count_label.pack(pady=(0, 10))  # Move up by reducing bottom padding
+        self.pwned_count_label.pack(pady=(0, 10))  
 
-        # Spacer to push buttons down
-        ctk.CTkLabel(self, text="").pack(expand=True, fill="both")  # Add a flexible spacer
+        # Spacer to push buttons down. Keeps them in place on diffrent screen sizes.
+        ctk.CTkLabel(self, text="").pack(expand=True, fill="both")  
 
         # Help button at the bottom right 
         self.help_button = ctk.CTkButton(
@@ -251,7 +249,6 @@ class PasswordCheckerApp(ctk.CTk):
             border_color=COLORS["button_border"],
             command=self.hallidays_egg,
         )
-        # Do NOT pack/place yet!
 
         # Tiny random joke button in the bottom right corner
         self.joke_button = ctk.CTkButton(
@@ -284,7 +281,6 @@ class PasswordCheckerApp(ctk.CTk):
             border_color=COLORS["button_border"],
             command=self.self_destruct_sequence,
         )
-        # Do NOT pack/place yet!
 
         # Developer area button (not packed by default)
         self.dev_area_button = ctk.CTkButton(
@@ -299,7 +295,6 @@ class PasswordCheckerApp(ctk.CTk):
             border_color=COLORS["button_border"],
             command=self.open_dev_area_quiz,
         )
-        # Do NOT pack/place yet!
 
         # Toggle password visibility button
         self.toggle_button = ctk.CTkButton(
@@ -318,7 +313,7 @@ class PasswordCheckerApp(ctk.CTk):
         # Place above and inline with the help button (bottom right, just above Help)
         self.toggle_button.place(relx=1.0, rely=1.0, anchor="se", x=-20, y=-70)
 
-    def open_help_window(self):
+    def open_help_window(self): # Help window with instructions on how to use the app.
         if hasattr(self, "help_win") and self.help_win.winfo_exists(): # Why is this the only way to check if a window exists?
             self.help_win.lift()
             self.help_win.attributes("-topmost", True)
@@ -346,7 +341,7 @@ class PasswordCheckerApp(ctk.CTk):
             text_color="#FFFFFF"
         )
         help_label.pack(padx=20, pady=20)
-        self.help_win.attributes("-topmost", True)
+        self.help_win.attributes("-topmost", True) # Keep the help window on top
         self.help_win.lift()
 
     def open_about_window(self): # I know this is a mess, but I don't care.
@@ -387,6 +382,7 @@ class PasswordCheckerApp(ctk.CTk):
         )
         github_link.pack(padx=20, pady=(0, 0))
         github_link.bind("<Button-1>", lambda e: webbrowser.open("https://github.com/Robertson-B"))
+        # Opens my GitHub profile in a web browser when the link is clicked
 
         # Email link
         email_link = ctk.CTkLabel(
@@ -398,6 +394,7 @@ class PasswordCheckerApp(ctk.CTk):
         )
         email_link.pack(padx=20, pady=(0, 20))
         email_link.bind("<Button-1>", lambda e: webbrowser.open("mailto:BitRealmgames@gmail.com"))
+        # Opens the default email client with my email address when clicked
 
         self.about_win.attributes("-topmost", True)
         self.about_win.lift()
@@ -405,7 +402,7 @@ class PasswordCheckerApp(ctk.CTk):
     def generate_secure_password(self):
         #Generate a random, secure password with widely accepted special characters.
         length =  16  # Length of the generated password
-        # Safer special characters for most sites
+        # Safe special characters for most sites
         safe_specials = "!@#$%^&*()-_=+[]{};:,.?/"
         characters = string.ascii_letters + string.digits + safe_specials
         password = "".join(random.choice(characters) for _ in range(length))
@@ -415,7 +412,7 @@ class PasswordCheckerApp(ctk.CTk):
     def check_password_strength(self):
         password = self.password_entry.get()
 
-        if not password:
+        if not password: #  checks if anything is inputed
             self.result_label.configure(text="No Password Entered", text_color="#FF5252")
             self.feedback_label.configure(text="Please enter a password to check its strength.")
             self.time_to_crack_label.configure(text="")
@@ -434,18 +431,18 @@ class PasswordCheckerApp(ctk.CTk):
             self.time_to_crack_label.configure(text="")
             self.pwned_count_label.configure(text="")  # Clear pwned count
             return
-        elif password.lower() == "upupdowndownleftrightleftrightba":
+        elif password.lower() == "upupdowndownleftrightleftrightba": # Secret code. I wonder where else this pops up?
             self.result_label.configure(text="Easter Egg!", text_color="#FFC107")
             self.feedback_label.configure(text="Konami Code detected! Unfortunately, no extra lives here.")
             self.time_to_crack_label.configure(text="")
             self.pwned_count_label.configure(text="")
             return
-        elif password.lower() == "nevergonnagiveyouup":
+        elif password.lower() == "nevergonnagiveyouup": # Lol
             self.result_label.configure(text="Rickrolled!", text_color="#FFC107")
             self.feedback_label.configure(text="🎵 Never gonna let you down... but this password will!")
             self.time_to_crack_label.configure(text="")
             self.pwned_count_label.configure(text="")
-            webbrowser.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+            webbrowser.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ") # Opens Rick Astley's "Never Gonna Give You Up" music video
             return
         elif password.lower() in ["bitrealm", "bitrealmgames", "robertson", "brobertson", "bean", "ben","benjamin"]:
             self.result_label.configure(text="Imposter!", text_color="#FFC107")
@@ -462,12 +459,6 @@ class PasswordCheckerApp(ctk.CTk):
         elif password.lower() == "drowssap":
             self.result_label.configure(text="Sneaky!", text_color="#FFC107")
             self.feedback_label.configure(text="Trying to be sneaky? 'password' backwards is still weak!")
-            self.time_to_crack_label.configure(text="")
-            self.pwned_count_label.configure(text="")
-            return
-        elif self.is_password_in_github_list(password): # Check against GitHub password list
-            self.result_label.configure(text="Common", text_color="#FF5252")
-            self.feedback_label.configure(text="This password appears in a public list and is really common. Choose another one!")
             self.time_to_crack_label.configure(text="")
             self.pwned_count_label.configure(text="")
             return
@@ -490,6 +481,12 @@ class PasswordCheckerApp(ctk.CTk):
             self.time_to_crack_label.configure(text="")
             self.pwned_count_label.configure(text="")
             return
+        elif self.is_password_in_github_list(password): # Check against GitHub password list
+            self.result_label.configure(text="Common", text_color="#FF5252")
+            self.feedback_label.configure(text="This password appears in a public list and is really common. Choose another one!")
+            self.time_to_crack_label.configure(text="")
+            self.pwned_count_label.configure(text="")
+            return
         else:
             # Regular password strength evaluation
             strength, color, feedback, time_to_crack = self.evaluate_password(password)
@@ -498,7 +495,7 @@ class PasswordCheckerApp(ctk.CTk):
             self.time_to_crack_label.configure(text=f"Estimated time to crack: {time_to_crack}")
             self.pwned_count_label.configure(text="")
 
-            # Pwnedpass check
+            # Pwnedpass check. tries to check if password has been leaked before.
             try:
                 pwned_count = pwnedpass.pwned(password)
             except Exception:
@@ -540,7 +537,7 @@ class PasswordCheckerApp(ctk.CTk):
 
         # Calculate entropy
         if charset_size > 0:
-            entropy = len(password) * math.log2(charset_size)
+            entropy = len(password) * math.log2(charset_size) # Fun Maths!
         else:
             entropy = 0
 
@@ -571,29 +568,23 @@ class PasswordCheckerApp(ctk.CTk):
                 time_to_crack = f"{seconds_to_crack / 31536000:.2f} years"
         except Exception:
             time_to_crack = "Inputted password is too large. Why do you need a password this long? Your breaking python! Try something shorter."
-
-        # Set strength bar value and color
+            
+        # Determine strength based on harsh entropy thresholds
         if entropy < 36:
             self.strength_bar.set(0.25)
-            self.strength_bar.configure(progress_color="#FF5252")  # Red
-        elif entropy < 60:
-            self.strength_bar.set(0.5)
-            self.strength_bar.configure(progress_color="#FFC107")  # Yellow
-        elif entropy < 120:
-            self.strength_bar.set(0.75)
-            self.strength_bar.configure(progress_color="#4CAF50")  # Green
-        else:
-            self.strength_bar.set(1.0)
-            self.strength_bar.configure(progress_color="#66BB6A")  # Light green
-
-        # Determine strength based on harsher entropy thresholds
-        if entropy < 36:
+            self.strength_bar.configure(progress_color="#FF5252")
             return "Weak", "#FF5252", " ".join(feedback), time_to_crack  # Red for weak passwords
         elif entropy < 60:
+            self.strength_bar.set(0.5)
+            self.strength_bar.configure(progress_color="#FFC107")
             return "Moderate", "#FFC107", " ".join(feedback), time_to_crack  # Yellow for moderate passwords
         elif entropy < 120:
+            self.strength_bar.set(0.75)
+            self.strength_bar.configure(progress_color="#4CAF50")
             return "Strong", "#4CAF50", " ".join(feedback), time_to_crack  # Green for strong passwords
         else:
+            self.strength_bar.set(1.0)
+            self.strength_bar.configure(progress_color="#66BB6A")
             return "Very Strong", "#66BB6A", "Your password is excellent!", time_to_crack  # Lighter green for very strong passwords
 
     def copy_password_to_clipboard(self): # Self explanatory
@@ -611,8 +602,9 @@ class PasswordCheckerApp(ctk.CTk):
             try:
                 with urllib.request.urlopen(github_url) as response, open(cache_file, "wb") as out_file:
                     out_file.write(response.read())
+                    # Store file in the current directory
             except Exception as e:
-                print(f"Error downloading password list: {e}")
+                print(f"Error downloading password list: {e}, check web connection and try again.")
                 return None
         return cache_file
 
@@ -632,14 +624,14 @@ class PasswordCheckerApp(ctk.CTk):
         return False
 
     def validate_password_input(self, new_value): 
-    # Only allow valid characters in the password entry
+    # Only allow valid characters in the password entry, nothing else
         for c in new_value:
             if c not in ALLOWED_PASSWORD_CHARS:
                 return False
         return True
 
     # Secret buttons also happens to be a fully functional key logger, but i dont really want to know what you type.
-    def konami_key_listener(self, event):
+    def key_listener(self, event):
         # Map keys to the konami code sequence
         key_map = {
             "Up": "up",
@@ -662,7 +654,7 @@ class PasswordCheckerApp(ctk.CTk):
 
         # For dev area button
         if event.char.isalnum():
-            self.dev_code_progress += event.char.lower()
+            self.dev_code_progress += event.char.lower() #checks if the inputted button is the next in the series, if not restart the series
             if len(self.dev_code_progress) > len(self.dev_code):
                 self.dev_code_progress = self.dev_code_progress[-len(self.dev_code):]
             if self.dev_code_progress == self.dev_code:
@@ -671,7 +663,7 @@ class PasswordCheckerApp(ctk.CTk):
         else:
             self.dev_code_progress = ""
 
-        # For minigame button (type "snakegame")
+        # For snake minigame
         if event.char.isalnum():
             self.minigame_code_progress += event.char.lower()
             if len(self.minigame_code_progress) > len(self.minigame_code):
@@ -686,7 +678,7 @@ class PasswordCheckerApp(ctk.CTk):
         # Place the hidden button next to the self-destruct button at the bottom right
         self.hidden_button.place(relx=1.0, rely=1.0, anchor="se", x=-470, y=-20)
 
-    def hallidays_egg(self):
+    def hallidays_egg(self): # A good book, terrible movie tho
         self.result_label.configure(text="🎉 Golden egg Unlocked! 🎉", text_color="#FFD700")
         self.feedback_label.configure(text="You found Halliday's egg! Shame my game company is not as good as his. And i'm not giving it to anyone, let alone you.")
         self.time_to_crack_label.configure(text="")
@@ -729,7 +721,7 @@ class PasswordCheckerApp(ctk.CTk):
 
     def show_random_joke(self):
         import random
-        jokes = [
+        jokes = [ # programming jokes
             "Why do programmers prefer dark mode?\nBecause light attracts bugs!",
             "A SQL query walks into a bar, walks up to two tables and asks:\n'Can I join you?'",
             "Why do Java developers wear glasses?\nBecause they don't see sharp.",
@@ -776,7 +768,7 @@ class PasswordCheckerApp(ctk.CTk):
 
     def open_dev_area_quiz(self):
         # List of (question, answer) pairs
-        
+        # Quiz to get into dev area
         if hasattr(self, "quiz_popup") and self.quiz_popup.winfo_exists():
             self.quiz_popup.lift()
             self.quiz_popup.attributes("-topmost", True)
@@ -815,6 +807,7 @@ class PasswordCheckerApp(ctk.CTk):
 
 
     def check_quiz_answer(self, event=None):
+        # Check the answer to the current quiz question to see if the person can access
         answer = self.quiz_entry.get()
         correct = self.quiz_questions[self.quiz_index][1]
         if re.sub(r"\s+", "", answer).lower() == re.sub(r"\s+", "", correct).lower(): # Ignore whitespace and case
@@ -826,7 +819,7 @@ class PasswordCheckerApp(ctk.CTk):
         else:
             self.quiz_popup.destroy()
             if self.quiz_score == len(self.quiz_questions):
-                self.open_dev_area()
+                self.open_dev_area() # must get everything correct
             else:
                 popup = ctk.CTkToplevel(self)
                 popup.title("Access Denied")
@@ -851,15 +844,17 @@ class PasswordCheckerApp(ctk.CTk):
             "Fong's passwords: fong, fongy, mrfong\n",
             "Secret buttons:",
             "Random Joke: tiny dot button in bottom right corner",
+            "Keep clicking the eye button",
             "Dark mode: double-click the header\n",
             "Secret commands",
             "Halliday's Egg: Up Up Down Down Left Right Left Right B A",
+            "Snake Minigame: Type 'snakegame'",
             "Self-Destruct: Escape key\n",
             "Thanks you for using this app!"
         ]
         popup = ctk.CTkToplevel(self)
         popup.title("Developer Area - All Secrets")
-        popup.geometry("500x400")
+        popup.geometry("500x600")
         popup.resizable(False, False)
         popup.configure(fg_color=COLORS["window_bg"])
         label = ctk.CTkLabel(
@@ -882,7 +877,7 @@ class PasswordCheckerApp(ctk.CTk):
         self.show_password = not self.show_password
         self.password_entry.configure(show="" if self.show_password else "*")
         # Optionally, update the button text/icon
-        self.toggle_button.configure(text=" 🙈" if self.show_password else "     👁️")
+        self.toggle_button.configure(text=" 🙈" if self.show_password else "     👁️") # Swap between emojies
         self.toggle_clicks += 1
 
         # Show funny messages at certain click counts
@@ -902,7 +897,7 @@ class PasswordCheckerApp(ctk.CTk):
 
 
     def launch_snake_minigame(self):
-
+        # fully functional snake
         snake_win = tk.Toplevel(self)
         snake_win.title("🐍 Snake Minigame 🐍")
         snake_win.geometry("320x340")
