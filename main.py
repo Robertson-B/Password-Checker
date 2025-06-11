@@ -8,6 +8,7 @@ import os  # For clearing the console
 import urllib.request # For checking if the password is in a public GitHub list of common passwords
 import webbrowser # For easter eggs
 import pwnedpass # For checking if the password has been pwned in data breaches
+import tkinter as tk # for secret minigames
 
 
 # Define a modern color palette for the app
@@ -53,12 +54,16 @@ class PasswordCheckerApp(ctk.CTk):
         # Developer access code variables
         self.dev_code_progress = ""
         self.dev_code = "bitrealm"
+        # Minigame code variables
+        self.minigame_code_progress = ""
+        self.minigame_code = "snakegame"
 
         self.bind_all("<Key>", self.konami_key_listener)
         self.bind_all("<Escape>", self.show_self_destruct_button)
 
         self.secret_theme_on = False
         self.show_password = False
+        self.toggle_clicks = 0
 
     def create_widgets(self):
         # Decorative header
@@ -666,6 +671,17 @@ class PasswordCheckerApp(ctk.CTk):
         else:
             self.dev_code_progress = ""
 
+        # For minigame button (type "snakegame")
+        if event.char.isalnum():
+            self.minigame_code_progress += event.char.lower()
+            if len(self.minigame_code_progress) > len(self.minigame_code):
+                self.minigame_code_progress = self.minigame_code_progress[-len(self.minigame_code):]
+            if self.minigame_code_progress == self.minigame_code:
+                self.launch_snake_minigame()
+                self.minigame_code_progress = ""
+        else:
+            self.minigame_code_progress = ""
+
     def show_hidden_button(self):
         # Place the hidden button next to the self-destruct button at the bottom right
         self.hidden_button.place(relx=1.0, rely=1.0, anchor="se", x=-470, y=-20)
@@ -867,6 +883,84 @@ class PasswordCheckerApp(ctk.CTk):
         self.password_entry.configure(show="" if self.show_password else "*")
         # Optionally, update the button text/icon
         self.toggle_button.configure(text=" 🙈" if self.show_password else "     👁️")
+        self.toggle_clicks += 1
+
+        # Show funny messages at certain click counts
+        if self.toggle_clicks == 20:
+            self.feedback_label.configure(text="You really like clicking that, huh?")
+        elif self.toggle_clicks == 50:
+            self.feedback_label.configure(text="It's just an eye button, not a fidget toy!")
+        elif self.toggle_clicks == 100:
+            self.feedback_label.configure(text="Okay, that's enough. The password isn't that interesting.")
+        elif self.toggle_clicks == 150:
+            self.feedback_label.configure(text="Achievement unlocked: Button Masher!")
+        elif self.toggle_clicks == 1000:
+            self.feedback_label.configure(text="Wow, you really like this button! Here's a secret: You can toggle password visibility with it!")
+        elif self.toggle_clicks > 150 and self.toggle_clicks % 50 == 0:
+            self.feedback_label.configure(text=f"You've clicked {self.toggle_clicks} times. Impressive dedication!")
+        
+
+
+    def launch_snake_minigame(self):
+
+        snake_win = tk.Toplevel(self)
+        snake_win.title("🐍 Snake Minigame 🐍")
+        snake_win.geometry("320x340")
+        snake_win.resizable(False, False)
+
+        canvas = tk.Canvas(snake_win, width=300, height=300, bg="#222831")
+        canvas.pack(padx=10, pady=10)
+
+        direction = "Right"
+        snake = [(100, 100), (90, 100), (80, 100)]
+        food = (random.randrange(0, 30) * 10, random.randrange(0, 30) * 10)
+        running = [True]
+
+        def draw():
+            canvas.delete("all")
+            for x, y in snake:
+                canvas.create_rectangle(x, y, x+10, y+10, fill="#4CAF50")
+            fx, fy = food
+            canvas.create_oval(fx, fy, fx+10, fy+10, fill="#FFC107")
+            snake_win.update_idletasks()
+
+        def move():
+            if not running[0]:
+                return
+            nonlocal food, direction
+            x, y = snake[0]
+            if direction == "Up":
+                y -= 10
+            elif direction == "Down":
+                y += 10
+            elif direction == "Left":
+                x -= 10
+            elif direction == "Right":
+                x += 10
+            new_head = (x, y)
+            if (x < 0 or x >= 300 or y < 0 or y >= 300 or new_head in snake):
+                running[0] = False
+                canvas.create_text(150, 150, text="Game Over!", fill="#FF5252", font=("Helvetica", 20, "bold"))
+                snake_win.after(2000, snake_win.destroy)  # <-- Close after 2 seconds
+                return
+            snake.insert(0, new_head)
+            if new_head == food:
+                food = (random.randrange(0, 30) * 10, random.randrange(0, 30) * 10)
+            else:
+                snake.pop()
+            draw()
+            snake_win.after(100, move)
+
+        def on_key(event):
+            nonlocal direction
+            if event.keysym in ["Up", "Down", "Left", "Right"]:
+                if (direction, event.keysym) not in [("Up", "Down"), ("Down", "Up"), ("Left", "Right"), ("Right", "Left")]:
+                    direction = event.keysym
+
+        snake_win.bind("<Key>", on_key)
+        draw()
+        move()
+        snake_win.focus_set()
 
 if __name__ == "__main__":
     os.system('cls||clear')  # Clear the console even for stupid macs
