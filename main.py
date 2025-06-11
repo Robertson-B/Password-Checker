@@ -58,8 +58,7 @@ class PasswordCheckerApp(ctk.CTk):
         self.bind_all("<Escape>", self.show_self_destruct_button)
 
         self.secret_theme_on = False
-
-
+        self.show_password = False
 
     def create_widgets(self):
         # Decorative header
@@ -91,7 +90,7 @@ class PasswordCheckerApp(ctk.CTk):
             border_width=2,
             border_color=COLORS["card_border"],
         )
-        self.card_frame.pack(pady=(20, 20), padx=20)
+        self.card_frame.pack(pady=(0, 10), padx=20)
 
         # Password entry
         vcmd = self.register(self.validate_password_input)
@@ -149,6 +148,18 @@ class PasswordCheckerApp(ctk.CTk):
             command=self.copy_password_to_clipboard,
         )
         self.copy_button.pack(pady=10)
+
+        # Password strength meter (progress bar)
+        self.strength_bar = ctk.CTkProgressBar(
+            self.card_frame,
+            width=400,
+            height=16,
+            corner_radius=8,
+            progress_color="#FF5252",  # Start as red
+        )
+        self.strength_bar.set(0.0)
+        self.strength_bar.pack(pady=(5, 10))
+        self.strength_bar.configure(progress_color="#989ca4")
 
         # Result label
         self.result_label = ctk.CTkLabel(
@@ -285,6 +296,23 @@ class PasswordCheckerApp(ctk.CTk):
         )
         # Do NOT pack/place yet!
 
+        # Toggle password visibility button
+        self.toggle_button = ctk.CTkButton(
+            self,
+            text="     👁️",
+            font=("Helvetica", 16),
+            fg_color="#888888",
+            hover_color="#555555",
+            corner_radius=10,
+            border_width=2,
+            border_color=COLORS["button_border"],
+            command=self.toggle_password_visibility,
+            width=100,
+            height=32,
+        )
+        # Place above and inline with the help button (bottom right, just above Help)
+        self.toggle_button.place(relx=1.0, rely=1.0, anchor="se", x=-20, y=-70)
+
     def open_help_window(self):
         if hasattr(self, "help_win") and self.help_win.winfo_exists(): # Why is this the only way to check if a window exists?
             self.help_win.lift()
@@ -387,6 +415,11 @@ class PasswordCheckerApp(ctk.CTk):
             self.feedback_label.configure(text="Please enter a password to check its strength.")
             self.time_to_crack_label.configure(text="")
             self.pwned_count_label.configure(text="")
+            self.strength_bar.set(0.0)  # Make the bar empty if no password
+            if self.secret_theme_on:
+                self.strength_bar.configure(progress_color="#504c54")
+            else:
+                self.strength_bar.configure(progress_color="#989ca4")
             return
         
         # Easter egg for specific passwords
@@ -533,6 +566,20 @@ class PasswordCheckerApp(ctk.CTk):
                 time_to_crack = f"{seconds_to_crack / 31536000:.2f} years"
         except Exception:
             time_to_crack = "Inputted password is too large. Why do you need a password this long? Your breaking python! Try something shorter."
+
+        # Set strength bar value and color
+        if entropy < 36:
+            self.strength_bar.set(0.25)
+            self.strength_bar.configure(progress_color="#FF5252")  # Red
+        elif entropy < 60:
+            self.strength_bar.set(0.5)
+            self.strength_bar.configure(progress_color="#FFC107")  # Yellow
+        elif entropy < 120:
+            self.strength_bar.set(0.75)
+            self.strength_bar.configure(progress_color="#4CAF50")  # Green
+        else:
+            self.strength_bar.set(1.0)
+            self.strength_bar.configure(progress_color="#66BB6A")  # Light green
 
         # Determine strength based on harsher entropy thresholds
         if entropy < 36:
@@ -684,8 +731,7 @@ class PasswordCheckerApp(ctk.CTk):
         popup.geometry("350x160")
         popup.resizable(False, False)
         popup.configure(fg_color=COLORS["window_bg"])
-        popup.configure(text_color= "#FFFFFF")
-        label = ctk.CTkLabel(popup, text=joke, font=("Helvetica", 13), justify="center", wraplength=320)
+        label = ctk.CTkLabel(popup, text=joke, font=("Helvetica", 13), justify="center", wraplength=320, text_color="#FFFFFF")
         label.pack(expand=True, fill="both", padx=15, pady=15)
         popup.attributes("-topmost", True)
         popup.lift()
@@ -815,6 +861,12 @@ class PasswordCheckerApp(ctk.CTk):
     def show_dev_area_button(self, event=None):
         # Place the dev area button at the bottom left
         self.dev_area_button.place(relx=0.0, rely=1.0, anchor="sw", x=20, y=-20)
+
+    def toggle_password_visibility(self):
+        self.show_password = not self.show_password
+        self.password_entry.configure(show="" if self.show_password else "*")
+        # Optionally, update the button text/icon
+        self.toggle_button.configure(text=" 🙈" if self.show_password else "     👁️")
 
 if __name__ == "__main__":
     os.system('cls||clear')  # Clear the console even for stupid macs
