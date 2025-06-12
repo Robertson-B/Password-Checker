@@ -9,6 +9,7 @@ import urllib.request # For checking if the password is in a public GitHub list 
 import webbrowser # For easter eggs
 import pwnedpass # For checking if the password has been pwned in data breaches
 import tkinter as tk # for secret minigames
+import base64 # For encoding secrets
 
 
 # Define a modern color palette for the app
@@ -856,29 +857,10 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
                 popup.configure(fg_color=COLORS["window_bg"])
                 popup.lift()
 
-    def open_dev_area(self):
-        secrets = [ # Stop cheating and looking at the code!
-            "Secret passwords:"
-            "Konami code: upupdowndownleftrightleftrightba",
-            "Rickroll: nevergonnagiveyouup",
-            "Palindrome password: any palindrome",
-            "Star Wars: maytheforcebewithyou",
-            "Iron Man: iloveyou3000",
-            "Leet speak: 1337, h4x0r, leet, l33t, hacker, h4cker",
-            "sneaky password: drowssap",
-            "Imposter: bitrealm, bitrealmgames, robertson, brobertson,\n    bean, ben, benjamin",
-            "Fong's passwords: fong, fongy, mrfong\n",
-            "Secret buttons:",
-            "Random Joke: tiny dot button in bottom right corner",
-            "Keep clicking the eye button",
-            "Dark mode: double-click the header\n",
-            "Secret commands",
-            "Halliday's Egg: Up Up Down Down Left Right Left Right B A",
-            "Snake Minigame: Type 'snakegame'",
-            "Pong Minigame: Type 'pingpong'",
-            "Self-Destruct: Escape key\n",
-            "Thanks you for using this app!"
-        ]
+    def open_dev_area(self): 
+        # Trying to cheat and see all the easter eggs of the program? Well, you have to answer some questions first.
+        secrets_b64 = b'CiAgICBTZWNyZXQgcGFzc3dvcmRzOgogICAgS29uYW1pIGNvZGU6IHVwdXBkb3duZG93bmxlZnRyaWdodGxlZnRyaWdodGJhCiAgICBSaWNrcm9sbDogbmV2ZXJnb25uYWdpdmV5b3V1cAogICAgUGFsaW5kcm9tZSBwYXNzd29yZDogYW55IHBhbGluZHJvbWUKICAgIFN0YXIgV2FyczogbWF5dGhlZm9yY2ViZXdpdGh5b3UKICAgIElyb24gTWFuOiBpbG92ZXlvdTMwMDAKICAgIExlZXQgc3BlYWs6IDEzMzcsIGg0eDByLCBsZWV0LCBsMzN0LCBoYWNrZXIsIGg0Y2tlcgogICAgc25lYWt5IHBhc3N3b3JkOiBkcm93c3NhcAogICAgSW1wb3N0ZXI6IGJpdHJlYWxtLCBiaXRyZWFsbWdhbWVzLCByb2JlcnRzb24sIGJyb2JlcnRzb24sIGJlYW4sIGJlbiwgYmVuamFtaW4KICAgIEZvbmcncyBwYXNzd29yZHM6IGZvbmcsIGZvbmd5LCBtcmZvbmcKICAgIFNlY3JldCBidXR0b25zOgogICAgUmFuZG9tIEpva2U6IHRpbnkgZG90IGJ1dHRvbiBpbiBib3R0b20gcmlnaHQgY29ybmVyCiAgICBLZWVwIGNsaWNraW5nIHRoZSBleWUgYnV0dG9uCiAgICBEYXJrIG1vZGU6IGRvdWJsZS1jbGljayB0aGUgaGVhZGVyCiAgICBTZWNyZXQgY29tbWFuZHMKICAgIEhhbGxpZGF5J3MgRWdnOiBVcCBVcCBEb3duIERvd24gTGVmdCBSaWdodCBMZWZ0IFJpZ2h0IEIgQQogICAgU25ha2UgTWluaWdhbWU6IFR5cGUgJ3NuYWtlZ2FtZScKICAgIFBvbmcgTWluaWdhbWU6IFR5cGUgJ3Bpbmdwb25nJwogICAgU2VsZi1EZXN0cnVjdDogRXNjYXBlIGtleQogICAgVGhhbmtzIHlvdSBmb3IgdXNpbmcgdGhpcyBhcHAh'
+        secrets = base64.b64decode(secrets_b64).decode("utf-8").splitlines()
         popup = ctk.CTkToplevel(self)
         popup.title("Developer Area - All Secrets")
         popup.geometry("500x600")
