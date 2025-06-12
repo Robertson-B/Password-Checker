@@ -41,7 +41,9 @@ ALL_ACHIEVEMENTS = {
     "Pong Pro": "You won the Pong minigame!",
     "Button Masher": "You clicked the eye button 150 times!",
     "Ready player one": "You found Halliday's egg!",
-    "Funny guy": "Hope you enjoyed the joke!"
+    "Funny guy": "Hope you enjoyed the joke!",
+    "Self-Destructed": "You activated the self-destruct sequence!",
+    "Admin": "You found the developer area with all the secrets and easter eggs!",
 }
 
 class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
@@ -832,6 +834,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         popup.geometry("350x120")
         popup.resizable(False, False)
         popup.configure(fg_color=COLORS["window_bg"])
+        self.unlock_achievement("Self-Destructed", "You activated the self-destruct sequence!")
         label = ctk.CTkLabel(
             popup,
             text="💥 BOOM! The app will now self-destruct! 💥",
@@ -917,6 +920,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         popup.geometry("500x600")
         popup.resizable(False, False)
         popup.configure(fg_color=COLORS["window_bg"])
+        self.unlock_achievement("Admin", "You found the developer area with all the secrets and easter eggs!")
         label = ctk.CTkLabel(
             popup,
             text="Welcome to the Developer Area! Here are some secrets and easter eggs:\n\n" + "\n".join(f"- {s}" for s in secrets),
