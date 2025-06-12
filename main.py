@@ -64,6 +64,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         self.secret_theme_on = False
         self.show_password = True
         self.toggle_clicks = 0
+        self.last_joke = None
 
     def create_widgets(self):
         # Decorative header
@@ -744,9 +745,21 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
             "To understand recursion, you must first understand recursion.",
             "Why was the developer unhappy at their job?\nThey wanted arrays.",
             "What's a programmer's favorite hangout place?\nThe Foo Bar.",
-            "Why did the Python programmer have so many friends?\nBecause they were very open-sourced."
+            "Why did the Python programmer have so many friends?\nBecause they were very open-sourced.",
+            "Why do programmers hate nature?\nIt has too many bugs.",
+            "What do you call a programmer from Finland?\nNerdic.",
+            "Where do DBA's keep their dad jokes?\nIn the dad-a-base.",
+            "Why did the functional programmer get chucked out of school?\nBecause they ignored all the classes,",
+            "How do Linux programs greet each other?\nHow do you sudo?",
+            "How long does it take programmers to code a progress bar?\n20 minutes...\nNo, 2 hours...\nNo, 10 minutes...\nNo, 10 days...\nNo, 40 minutes...",
+            "Perhaps the real leaky abstractions...\nare the friends we declared along the way.",
         ]
+        # Pick a new joke that's not the same as the last one
         joke = random.choice(jokes)
+        while joke == self.last_joke and len(jokes) > 1:
+            joke = random.choice(jokes)
+        self.last_joke = joke
+
         popup = ctk.CTkToplevel(self)
         popup.title("Random Programming Joke")
         popup.geometry("350x160")
