@@ -10,6 +10,7 @@ import webbrowser # For easter eggs
 import pwnedpass # For checking if the password has been pwned in data breaches
 import tkinter as tk # for secret minigames
 import base64 # For encoding secrets
+import json # For achievement storage
 
 
 # Define a modern color palette for the app
@@ -31,6 +32,17 @@ COLORS = {
 
 # Define allowed characters for password input
 ALLOWED_PASSWORD_CHARS = string.ascii_letters + string.digits + "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
+
+ALL_ACHIEVEMENTS = {
+    "Egg Hunter": "You found all the easter eggs!",
+    "First Check!": "You checked your first password.",
+    "Century Checker": "You've checked 100 passwords!",
+    "Snake Charmer": "You won the Snake minigame!",
+    "Pong Pro": "You won the Pong minigame!",
+    "Button Masher": "You clicked the eye button 150 times!",
+    "Ready player one": "You found Halliday's egg!",
+    "Funny guy": "Hope you enjoyed the joke!"
+}
 
 class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
     def __init__(self):
@@ -66,6 +78,10 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         self.show_password = True
         self.toggle_clicks = 0
         self.last_joke = None
+        self.achievements = set()
+        self.password_checks = 0
+        
+        self.load_progress() # Load achivement progress 
 
     def create_widgets(self):
         # Decorative header
@@ -317,6 +333,34 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         # Place above and inline with the help button (bottom right, just above Help)
         self.toggle_button.place(relx=1.0, rely=1.0, anchor="se", x=-20, y=-70)
 
+        # Achievements button (bottom left, above Dev Area button)
+        self.achievements_button = ctk.CTkButton(
+            self,
+            text="Achievements",
+            font=("Helvetica", 14),
+            fg_color="#888888",
+            hover_color="#555555",
+            corner_radius=10,
+            border_width=2,
+            border_color=COLORS["button_border"],
+            command=self.show_achievements,
+        )
+        self.achievements_button.place(relx=0.0, rely=1.0, anchor="sw", x=20, y=-20)
+
+        # Developer area button (now above Achievements button)
+        self.dev_area_button = ctk.CTkButton(
+            self,
+            text="Dev Area",
+            font=("Helvetica", 14, "bold"),
+            fg_color="#222831",
+            hover_color="#005A9E",
+            text_color="#FFFFFF",
+            corner_radius=10,
+            border_width=2,
+            border_color=COLORS["button_border"],
+            command=self.open_dev_area_quiz,
+        )
+
     def open_help_window(self): # Help window with instructions on how to use the app.
         if hasattr(self, "help_win") and self.help_win.winfo_exists(): # Why is this the only way to check if a window exists?
             self.help_win.lift()
@@ -427,94 +471,99 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
             else:
                 self.strength_bar.configure(progress_color="#989ca4")
             return
-        
-        # Easter egg for specific passwords
-        elif password.lower() in ["fong", "fongy", "mrfong"]:
-            self.result_label.configure(text="Terrible", text_color="#FF5252")  # Red for bad passwords
-            self.feedback_label.configure(text="That's a crap password Fong! Try something more original!")
-            self.time_to_crack_label.configure(text="")
-            self.pwned_count_label.configure(text="")  # Clear pwned count
-            return
-        elif password.lower() == "upupdowndownleftrightleftrightba": # Secret code. I wonder where else this pops up?
-            self.result_label.configure(text="Easter Egg!", text_color="#FFC107")
-            self.feedback_label.configure(text="Konami Code detected! Unfortunately, no extra lives here.")
-            self.time_to_crack_label.configure(text="")
-            self.pwned_count_label.configure(text="")
-            return
-        elif password.lower() == "nevergonnagiveyouup": # Lol
-            self.result_label.configure(text="Rickrolled!", text_color="#FFC107")
-            self.feedback_label.configure(text="🎵 Never gonna let you down... but this password will!")
-            self.time_to_crack_label.configure(text="")
-            self.pwned_count_label.configure(text="")
-            webbrowser.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ") # Opens Rick Astley's "Never Gonna Give You Up" music video
-            return
-        elif password.lower() in ["bitrealm", "bitrealmgames", "robertson", "brobertson", "bean", "ben","benjamin"]:
-            self.result_label.configure(text="Imposter!", text_color="#FFC107")
-            self.feedback_label.configure(text="Trying to impersonate the developer? Nice try!")
-            self.time_to_crack_label.configure(text="")
-            self.pwned_count_label.configure(text="")
-            return
-        elif password.lower() in ["1337", "h4x0r", "leet", "l33t", "hacker", "h4cker"]:
-            self.result_label.configure(text="Leet Detected!", text_color="#FFC107")
-            self.feedback_label.configure(text="Leet detected! Hack the planet!")
-            self.time_to_crack_label.configure(text="")
-            self.pwned_count_label.configure(text="")
-            return
-        elif password.lower() == "drowssap":
-            self.result_label.configure(text="Sneaky!", text_color="#FFC107")
-            self.feedback_label.configure(text="Trying to be sneaky? 'password' backwards is still weak!")
-            self.time_to_crack_label.configure(text="")
-            self.pwned_count_label.configure(text="")
-            return
-        # Palindrome password easter egg
-        elif password and password.lower() == password.lower()[::-1] and len(password) > 2:
-            self.result_label.configure(text="Palindrome!", text_color="#FFC107")
-            self.feedback_label.configure(text="Cool, your password is a palindrome!")
-            self.time_to_crack_label.configure(text="")
-            self.pwned_count_label.configure(text="")
-            return
-        elif password.lower() == "maytheforcebewithyou":
-            self.result_label.configure(text="Star Wars!", text_color="#FFC107")
-            self.feedback_label.configure(text="The Force is strong with you, but not this password.")
-            self.time_to_crack_label.configure(text="")
-            self.pwned_count_label.configure(text="")
-            return
-        elif password.lower() == "iloveyou3000":
-            self.result_label.configure(text="Iron Man!", text_color="#FFC107")
-            self.feedback_label.configure(text="Iron Man approves, but hackers do too!")
-            self.time_to_crack_label.configure(text="")
-            self.pwned_count_label.configure(text="")
-            return
-        elif self.is_password_in_github_list(password): # Check against GitHub password list
-            self.result_label.configure(text="Common", text_color="#FF5252")
-            self.feedback_label.configure(text="This password appears in a public list and is really common. Choose another one!")
-            self.time_to_crack_label.configure(text="")
-            self.pwned_count_label.configure(text="")
-            return
         else:
-            # Regular password strength evaluation
-            strength, color, feedback, time_to_crack = self.evaluate_password(password)
-            self.result_label.configure(text=strength, text_color=color)
-            self.feedback_label.configure(text=feedback)
-            self.time_to_crack_label.configure(text=f"Estimated time to crack: {time_to_crack}")
-            self.pwned_count_label.configure(text="")
-
-            # Pwnedpass check. tries to check if password has been leaked before.
-            try:
-                pwned_count = pwnedpass.pwned(password)
-            except Exception:
-                pwned_count = 0
-            if pwned_count:
-                self.pwned_count_label.configure(
-                    text=f"This password has been found {pwned_count:,} times in data breaches!",
-                    text_color="#FF5252"  # Red for breached
-                )
+            # Easter egg for specific passwords
+            if password.lower() in ["fong", "fongy", "mrfong"]:
+                self.result_label.configure(text="Terrible", text_color="#FF5252")  # Red for bad passwords
+                self.feedback_label.configure(text="That's a crap password Fong! Try something more original!")
+                self.time_to_crack_label.configure(text="")
+                self.pwned_count_label.configure(text="")  # Clear pwned count
+                return
+            elif password.lower() == "upupdowndownleftrightleftrightba": # Secret code. I wonder where else this pops up?
+                self.result_label.configure(text="Easter Egg!", text_color="#FFC107")
+                self.feedback_label.configure(text="Konami Code detected! Unfortunately, no extra lives here.")
+                self.time_to_crack_label.configure(text="")
+                self.pwned_count_label.configure(text="")
+                return
+            elif password.lower() == "nevergonnagiveyouup": # Lol
+                self.result_label.configure(text="Rickrolled!", text_color="#FFC107")
+                self.feedback_label.configure(text="🎵 Never gonna let you down... but this password will!")
+                self.time_to_crack_label.configure(text="")
+                self.pwned_count_label.configure(text="")
+                webbrowser.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ") # Opens Rick Astley's "Never Gonna Give You Up" music video
+                return
+            elif password.lower() in ["bitrealm", "bitrealmgames", "robertson", "brobertson", "bean", "ben","benjamin"]:
+                self.result_label.configure(text="Imposter!", text_color="#FFC107")
+                self.feedback_label.configure(text="Trying to impersonate the developer? Nice try!")
+                self.time_to_crack_label.configure(text="")
+                self.pwned_count_label.configure(text="")
+                return
+            elif password.lower() in ["1337", "h4x0r", "leet", "l33t", "hacker", "h4cker"]:
+                self.result_label.configure(text="Leet Detected!", text_color="#FFC107")
+                self.feedback_label.configure(text="Leet detected! Hack the planet!")
+                self.time_to_crack_label.configure(text="")
+                self.pwned_count_label.configure(text="")
+                return
+            elif password.lower() == "drowssap":
+                self.result_label.configure(text="Sneaky!", text_color="#FFC107")
+                self.feedback_label.configure(text="Trying to be sneaky? 'password' backwards is still weak!")
+                self.time_to_crack_label.configure(text="")
+                self.pwned_count_label.configure(text="")
+                return
+            # Palindrome password easter egg
+            elif password and password.lower() == password.lower()[::-1] and len(password) > 2:
+                self.result_label.configure(text="Palindrome!", text_color="#FFC107")
+                self.feedback_label.configure(text="Cool, your password is a palindrome!")
+                self.time_to_crack_label.configure(text="")
+                self.pwned_count_label.configure(text="")
+                return
+            elif password.lower() == "maytheforcebewithyou":
+                self.result_label.configure(text="Star Wars!", text_color="#FFC107")
+                self.feedback_label.configure(text="The Force is strong with you, but not this password.")
+                self.time_to_crack_label.configure(text="")
+                self.pwned_count_label.configure(text="")
+                return
+            elif password.lower() == "iloveyou3000":
+                self.result_label.configure(text="Iron Man!", text_color="#FFC107")
+                self.feedback_label.configure(text="Iron Man approves, but hackers do too!")
+                self.time_to_crack_label.configure(text="")
+                self.pwned_count_label.configure(text="")
+                return
+            elif self.is_password_in_github_list(password): # Check against GitHub password list
+                self.result_label.configure(text="Common", text_color="#FF5252")
+                self.feedback_label.configure(text="This password appears in a public list and is really common. Choose another one!")
+                self.time_to_crack_label.configure(text="")
+                self.pwned_count_label.configure(text="")
+                return
             else:
-                color = COLORS["text_secondary"] if not self.secret_theme_on else "#CCCCCC" # Have to do it this way because you can't use an if statement in a function call.
-                self.pwned_count_label.configure(
-                    text="This password has not been found in any known data breaches.",
-                    text_color=color
-                )
+                # Regular password strength evaluation
+                strength, color, feedback, time_to_crack = self.evaluate_password(password)
+                self.result_label.configure(text=strength, text_color=color)
+                self.feedback_label.configure(text=feedback)
+                self.time_to_crack_label.configure(text=f"Estimated time to crack: {time_to_crack}")
+                self.pwned_count_label.configure(text="")
+                # Pwnedpass check. tries to check if password has been leaked before.
+                try:
+                    pwned_count = pwnedpass.pwned(password)
+                except Exception:
+                    pwned_count = 0
+                if pwned_count:
+                    self.pwned_count_label.configure(
+                        text=f"This password has been found {pwned_count:,} times in data breaches!",
+                        text_color="#FF5252"  # Red for breached
+                    )
+                else:
+                    color = COLORS["text_secondary"] if not self.secret_theme_on else "#CCCCCC" # Have to do it this way because you can't use an if statement in a function call.
+                    self.pwned_count_label.configure(
+                        text="This password has not been found in any known data breaches.",
+                        text_color=color
+                    )
+            self.password_checks += 1
+            if self.password_checks == 1:
+                self.unlock_achievement("First Check!", "You checked your first password.")
+            if self.password_checks == 100:
+                self.unlock_achievement("Century Checker", "You've checked 100 passwords!")
+            self.save_progress()
 
     def evaluate_password(self, password):
         # Initialize feedback
@@ -698,6 +747,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         self.feedback_label.configure(text="You found Halliday's egg! Shame my game company is not as good as his. And i'm not giving it to anyone, let alone you.")
         self.time_to_crack_label.configure(text="")
         self.pwned_count_label.configure(text="")
+        self.unlock_achievement("Ready player one", "You found halliday's egg!")
 
     def toggle_secret_theme(self, event=None):
         # Toggle a secret dark theme on double-clicking the header
@@ -770,6 +820,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         label.pack(expand=True, fill="both", padx=15, pady=15)
         popup.attributes("-topmost", True)
         popup.lift()
+        self.unlock_achievement("Funny guy", "Hope you enjoyed the joke!")
 
     def show_self_destruct_button(self, event=None):
         # Place the self-destruct button at the bottom right, aligned with the other buttons
@@ -859,7 +910,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
 
     def open_dev_area(self): 
         # Trying to cheat and see all the easter eggs of the program? Well, you have to answer some questions first.
-        secrets_b64 = b'CiAgICBTZWNyZXQgcGFzc3dvcmRzOgogICAgS29uYW1pIGNvZGU6IHVwdXBkb3duZG93bmxlZnRyaWdodGxlZnRyaWdodGJhCiAgICBSaWNrcm9sbDogbmV2ZXJnb25uYWdpdmV5b3V1cAogICAgUGFsaW5kcm9tZSBwYXNzd29yZDogYW55IHBhbGluZHJvbWUKICAgIFN0YXIgV2FyczogbWF5dGhlZm9yY2ViZXdpdGh5b3UKICAgIElyb24gTWFuOiBpbG92ZXlvdTMwMDAKICAgIExlZXQgc3BlYWs6IDEzMzcsIGg0eDByLCBsZWV0LCBsMzN0LCBoYWNrZXIsIGg0Y2tlcgogICAgc25lYWt5IHBhc3N3b3JkOiBkcm93c3NhcAogICAgSW1wb3N0ZXI6IGJpdHJlYWxtLCBiaXRyZWFsbWdhbWVzLCByb2JlcnRzb24sIGJyb2JlcnRzb24sIGJlYW4sIGJlbiwgYmVuamFtaW4KICAgIEZvbmcncyBwYXNzd29yZHM6IGZvbmcsIGZvbmd5LCBtcmZvbmcKICAgIFNlY3JldCBidXR0b25zOgogICAgUmFuZG9tIEpva2U6IHRpbnkgZG90IGJ1dHRvbiBpbiBib3R0b20gcmlnaHQgY29ybmVyCiAgICBLZWVwIGNsaWNraW5nIHRoZSBleWUgYnV0dG9uCiAgICBEYXJrIG1vZGU6IGRvdWJsZS1jbGljayB0aGUgaGVhZGVyCiAgICBTZWNyZXQgY29tbWFuZHMKICAgIEhhbGxpZGF5J3MgRWdnOiBVcCBVcCBEb3duIERvd24gTGVmdCBSaWdodCBMZWZ0IFJpZ2h0IEIgQQogICAgU25ha2UgTWluaWdhbWU6IFR5cGUgJ3NuYWtlZ2FtZScKICAgIFBvbmcgTWluaWdhbWU6IFR5cGUgJ3Bpbmdwb25nJwogICAgU2VsZi1EZXN0cnVjdDogRXNjYXBlIGtleQogICAgVGhhbmtzIHlvdSBmb3IgdXNpbmcgdGhpcyBhcHAh'
+        secrets_b64 = b'CiAgICBTZWNyZXQgcGFzc3dvcmRzOgogICAgS29uYW1pIGNvZGU6IHVwdXBkb3duZG93bmxlZnRyaWdodGxlZnRyaWdodGJhCiAgICBSaWNrcm9sbDogbmV2ZXJnb25uYWdpdmV5b3V1cAogICAgUGFsaW5kcm9tZSBwYXNzd29yZDogYW55IHBhbGluZHJvbWUKICAgIFN0YXIgV2FyczogbWF5dGhlZm9yY2ViZXdpdGh5b3UKICAgIElyb24gTWFuOiBpbG92ZXlvdTMwMDAKICAgIExlZXQgc3BlYWs6IDEzMzcsIGg0eDByLCBsZWV0LCBsMzN0LCBoYWNrZXIsIGg0Y2tlcgogICAgc25lYWt5IHBhc3N3b3JkOiBkcm93c3NhcAogICAgSW1wb3N0ZXI6IGJpdHJlYWxtLCBiaXRyZWFsbWdhbWVzLCByb2JlcnRzb24sIGJyb2JlcnRzb24sIGJlYW4sIGJlbiwgYmVuamFtaW4KICAgIEZvbmcncyBwYXNzd29yZHM6IGZvbmcsIGZvbmd5LCBtcmZvbmcKICAgIFNlY3JldCBidXR0b25zOgogICAgUmFuZG9tIEpva2U6IHRpbnkgZG90IGJ1dHRvbiBpbiBib3R0b20gcmlnaHQgY29ybmVyCiAgICBLZWVwIGNsaWNraW5nIHRoZSBleWUgYnV0dG9uCiAgICBEYXJrIG1vZGU6IGRvdWJsZS1jbGljayB0aGUgaGVhZGVyCiAgICBTZWNyZXQgY29tbWFuZHMKICAgIEhhbGxpZGF5J3MgRWdnOiBVcCBEb3duIERvd24gTGVmdCBSaWdodCBMZWZ0IFJpZ2h0IEIgQQogICAgU25ha2UgTWluaWdhbWU6IFR5cGUgJ3NuYWtlZ2FtZScKICAgIFBvbmcgTWluaWdhbWU6IFR5cGUgJ3Bpbmdwb25nJwogICAgU2VsZi1EZXN0cnVjdDogRXNjYXBlIGtleQogICAgVGhhbmtzIHlvdSBmb3IgdXNpbmcgdGhpcyBhcHAh'
         secrets = base64.b64decode(secrets_b64).decode("utf-8").splitlines()
         popup = ctk.CTkToplevel(self)
         popup.title("Developer Area - All Secrets")
@@ -880,7 +931,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
 
     def show_dev_area_button(self, event=None):
         # Place the dev area button at the bottom left
-        self.dev_area_button.place(relx=0.0, rely=1.0, anchor="sw", x=20, y=-20)
+        self.dev_area_button.place(relx=0.0, rely=1.0, anchor="sw", x=20, y=-70)
 
     def toggle_password_visibility(self):
         self.show_password = not self.show_password
@@ -897,6 +948,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
             self.feedback_label.configure(text="Okay, that's enough. The password isn't that interesting.")
         elif self.toggle_clicks == 150:
             self.feedback_label.configure(text="Achievement unlocked: Button Masher!")
+            self.unlock_achievement("Button Masher", "You clicked the toggle button 150 times!")
         elif self.toggle_clicks == 1000:
             self.feedback_label.configure(text="Wow, you really like this button! Here's a secret: You can toggle password visibility with it!")
         elif self.toggle_clicks > 150 and self.toggle_clicks % 50 == 0:
@@ -944,13 +996,23 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
             if (x < 0 or x >= 300 or y < 0 or y >= 300 or new_head in snake):
                 running[0] = False
                 canvas.create_text(150, 150, text="Game Over!", fill="#FF5252", font=("Helvetica", 20, "bold"))
-                snake_win.after(2000, snake_win.destroy)  # <-- Close after 2 seconds
+                snake_win.after(2000, snake_win.destroy)
                 return
             snake.insert(0, new_head)
             if new_head == food:
                 food = (random.randrange(0, 30) * 10, random.randrange(0, 30) * 10)
             else:
                 snake.pop()
+            # WIN CONDITION
+            if len(snake) >= 15:
+                running[0] = False
+                canvas.create_text(150, 150, text="You Win!", fill="#FFD700", font=("Helvetica", 20, "bold"))
+                try:
+                    self.unlock_achievement("Snake Charmer", "You won the Snake minigame!")
+                except Exception:
+                    pass
+                snake_win.after(2000, snake_win.destroy)
+                return
             draw()
             snake_win.after(100, move)
 
@@ -981,8 +1043,9 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         ball_size = 15
         player_y = 150
         ai_y = 150
-        ball_x, ball_y = 480, 180
-        ball_dx, ball_dy = 4, 4
+        ball_speed = 4  # initial speed
+        ball_x, ball_y = 240, 180  # Center of the canvas
+        ball_dx, ball_dy = ball_speed, ball_speed
         player_score = 0
         ai_score = 0
         running = [True]
@@ -1014,10 +1077,12 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
 
             # Ball collision with player paddle
             if (20 <= ball_x <= 30 and player_y <= ball_y + ball_size/2 <= player_y + paddle_height):
-                ball_dx = abs(ball_dx)
+                ball_dx = abs(ball_dx) *1.05
+                ball_dy = ball_dy * 1.05
             # Ball collision with AI paddle
             if (450 <= ball_x + ball_size <= 460 and ai_y <= ball_y + ball_size/2 <= ai_y + paddle_height):
-                ball_dx = -abs(ball_dx)
+                ball_dx = -abs(ball_dx) *1.05
+                ball_dy = ball_dy * 1.05
 
             # Ball out of bounds (score)
             if ball_x < 0:
@@ -1027,7 +1092,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
                 player_score += 1
                 reset_ball()
 
-            # AI paddle movement (simple)
+            # AI paddle movement (slower)
             if ai_y + paddle_height/2 < ball_y:
                 ai_y += 4
             elif ai_y + paddle_height/2 > ball_y:
@@ -1039,15 +1104,26 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
                 running[0] = False
                 winner = "Player" if player_score == 5 else "AI"
                 canvas.create_text(240, 180, text=f"{winner} Wins!", fill="#FF5252", font=("Helvetica", 24, "bold"))
+                if winner == "Player":
+                    try:
+                        self.unlock_achievement("Pong Pro", "You won the Pong minigame!")
+                    except Exception:
+                        pass
                 pong_win.after(2000, pong_win.destroy)
                 return
 
             pong_win.after(30, move_ball)
 
         def reset_ball():
-            nonlocal ball_x, ball_y, ball_dx, ball_dy
-            ball_x, ball_y = 240, 180
-            ball_dx = -ball_dx
+            nonlocal ball_x, ball_y, ball_dx, ball_dy, ball_speed
+            ball_x, ball_y = 240, 180  # Center
+            ball_speed = 4
+            # Randomize direction
+            ball_dx = random.choice([-ball_speed, ball_speed])
+            ball_dy = random.choice([-ball_speed, ball_speed])
+            max_speed = 20
+            ball_dx = max(-max_speed, min(ball_dx, max_speed))
+            ball_dy = max(-max_speed, min(ball_dy, max_speed))
 
         def on_key(event):
             nonlocal player_y
@@ -1060,6 +1136,108 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         draw()
         move_ball()
         pong_win.focus_set()
+
+    def unlock_achievement(self, name, description):
+        if name not in self.achievements:
+            self.achievements.add(name)
+            self.save_progress()
+            popup = ctk.CTkToplevel(self)
+            popup.title("")  # No title bar text
+            popup.geometry("320x80+30+30")  # Width x Height + X + Y (top left)
+            popup.overrideredirect(True)  # Remove window decorations
+            popup.resizable(False, False)
+            popup.configure(fg_color="#222831")  # Steam-like dark background
+
+            # Achievement icon (emoji or image)
+            icon = ctk.CTkLabel(
+                popup,
+                text="🏆",
+                font=("Helvetica", 32),
+                text_color="#FFD700",
+                fg_color="#222831",
+                width=60,
+                height=60,
+            )
+            icon.place(x=10, y=10)
+
+            # Achievement text
+            text_label = ctk.CTkLabel(
+                popup,
+                text=f"Achievement Unlocked!\n{name}\n{description}",
+                font=("Helvetica", 13, "bold"),
+                justify="left",
+                text_color="#FFFFFF",
+                fg_color="#222831",
+                wraplength=220,
+            )
+            text_label.place(x=70, y=10)
+
+            popup.attributes("-topmost", True)
+            popup.lift()
+            # Fade out after 2.5 seconds
+            popup.after(2500, popup.destroy)
+            
+            
+        # Check for Egg Hunter achievement
+        if name != "Egg Hunter":
+            all_but_egg_hunter = set(ALL_ACHIEVEMENTS.keys()) - {"Egg Hunter"}
+            if all_but_egg_hunter.issubset(self.achievements):
+                # Wait 2.5 seconds before showing Egg Hunter
+                self.after(2500, lambda: self.unlock_achievement("Egg Hunter", ALL_ACHIEVEMENTS["Egg Hunter"]))
+
+    def show_achievements(self):
+        popup = ctk.CTkToplevel(self)
+        popup.title("Achievements")
+        popup.geometry("420x400")
+        popup.resizable(False, False)
+        popup.configure(fg_color=COLORS["window_bg"])
+
+        # Scrollable frame for achievements
+        frame = ctk.CTkScrollableFrame(popup, fg_color=COLORS["window_bg"], width=400, height=360)
+        frame.pack(expand=True, fill="both", padx=10, pady=10)
+
+        for name, desc in ALL_ACHIEVEMENTS.items():
+            unlocked = name in self.achievements
+            icon = "🏆" if unlocked else "🔒"
+            color = "#FFD700" if unlocked else "#888888"
+            ach_frame = ctk.CTkFrame(frame, fg_color=COLORS["window_bg"], border_width=0)
+            ach_frame.pack(fill="x", pady=4, padx=4)
+            icon_label = ctk.CTkLabel(ach_frame, text=icon, font=("Helvetica", 22), text_color=color, width=40)
+            icon_label.pack(side="left")
+            text_label = ctk.CTkLabel(
+                ach_frame,
+                text=f"{name}\n{desc}",
+                font=("Helvetica", 13, "bold" if unlocked else "normal"),
+                text_color=color,
+                justify="left",
+                wraplength=320,
+            )
+            text_label.pack(side="left", padx=8)
+        popup.attributes("-topmost", True)
+        popup.lift()
+
+    def save_progress(self): # saves achievement progress between runs
+        data = {
+            "achievements": list(self.achievements),
+            "password_checks": self.password_checks
+        }
+        try:
+            with open("progress.json", "w") as f:
+                json.dump(data, f)
+        except Exception as e:
+            print(f"Error saving progress: {e}")
+
+    def load_progress(self): # Loads/ creates achievement file
+        try:
+            with open("progress.json", "r") as f:
+                data = json.load(f)
+                self.achievements = set(data.get("achievements", []))
+                self.password_checks = data.get("password_checks", 0)
+        except Exception:
+            # No file or error, just start fresh
+            self.achievements = set()
+            self.password_checks = 0
+
 
 if __name__ == "__main__":
     os.system('cls||clear')  # Clear the console even for stupid macs
