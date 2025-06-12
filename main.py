@@ -54,13 +54,15 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         # Minigame code variables
         self.minigame_code_progress = ""
         self.minigame_code = "snakegame"
+        self.pong_code_progress = ""
+        self.pong_code = "pingpong"
 
         # Bind key events for secret buttons and Easter eggs
         self.bind_all("<Key>", self.key_listener)
         self.bind_all("<Escape>", self.show_self_destruct_button)
 
         self.secret_theme_on = False
-        self.show_password = False
+        self.show_password = True
         self.toggle_clicks = 0
 
     def create_widgets(self):
@@ -299,7 +301,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         # Toggle password visibility button
         self.toggle_button = ctk.CTkButton(
             self,
-            text="     👁️",
+            text=" 🙈",
             font=("Helvetica", 16),
             fg_color="#888888",
             hover_color="#555555",
@@ -674,6 +676,17 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         else:
             self.minigame_code_progress = ""
 
+        # For pong minigame
+        if event.char.isalnum():
+            self.pong_code_progress += event.char.lower()
+            if len(self.pong_code_progress) > len(self.pong_code):
+                self.pong_code_progress = self.pong_code_progress[-len(self.pong_code):]
+            if self.pong_code_progress == self.pong_code:
+                self.launch_pong_minigame()
+                self.pong_code_progress = ""
+        else:
+            self.pong_code_progress = ""
+
     def show_hidden_button(self):
         # Place the hidden button next to the self-destruct button at the bottom right
         self.hidden_button.place(relx=1.0, rely=1.0, anchor="se", x=-470, y=-20)
@@ -849,6 +862,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
             "Secret commands",
             "Halliday's Egg: Up Up Down Down Left Right Left Right B A",
             "Snake Minigame: Type 'snakegame'",
+            "Pong Minigame: Type 'pingpong'",
             "Self-Destruct: Escape key\n",
             "Thanks you for using this app!"
         ]
@@ -876,7 +890,6 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
     def toggle_password_visibility(self):
         self.show_password = not self.show_password
         self.password_entry.configure(show="" if self.show_password else "*")
-        # Optionally, update the button text/icon
         self.toggle_button.configure(text=" 🙈" if self.show_password else "     👁️") # Swap between emojies
         self.toggle_clicks += 1
 
@@ -956,6 +969,102 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         draw()
         move()
         snake_win.focus_set()
+
+    def launch_pong_minigame(self):
+
+        pong_win = tk.Toplevel(self)
+        pong_win.title("🏓 Pong Minigame 🏓")
+        pong_win.geometry("500x400")
+        pong_win.resizable(False, False)
+
+        canvas = tk.Canvas(pong_win, width=480, height=360, bg="#222831")
+        canvas.pack(padx=10, pady=10)
+
+        # Paddle and ball setup
+        paddle_height = 60
+        paddle_width = 10
+        ball_size = 15
+        player_y = 150
+        ai_y = 150
+        ball_x, ball_y = 480, 180
+        ball_dx, ball_dy = 4, 4
+        player_score = 0
+        ai_score = 0
+        running = [True]
+
+        def draw():
+            canvas.delete("all")
+            # Draw paddles
+            canvas.create_rectangle(20, player_y, 20 + paddle_width, player_y + paddle_height, fill="#4CAF50")
+            canvas.create_rectangle(450, ai_y, 450 + paddle_width, ai_y + paddle_height, fill="#FFC107")
+            # Draw ball
+            canvas.create_oval(ball_x, ball_y, ball_x + ball_size, ball_y + ball_size, fill="#FFFFFF")
+            # Draw scores
+            canvas.create_text(120, 20, text=f"Player: {player_score}", fill="#4CAF50", font=("Helvetica", 14, "bold"))
+            canvas.create_text(360, 20, text=f"AI: {ai_score}", fill="#FFC107", font=("Helvetica", 14, "bold"))
+            pong_win.update_idletasks()
+
+        def move_ball():
+            nonlocal ball_x, ball_y, ball_dx, ball_dy, player_score, ai_score, ai_y, running
+            if not running[0]:
+                return
+
+            # Move ball
+            ball_x += ball_dx
+            ball_y += ball_dy
+
+            # Ball collision with top/bottom
+            if ball_y <= 0 or ball_y + ball_size >= 360:
+                ball_dy = -ball_dy
+
+            # Ball collision with player paddle
+            if (20 <= ball_x <= 30 and player_y <= ball_y + ball_size/2 <= player_y + paddle_height):
+                ball_dx = abs(ball_dx)
+            # Ball collision with AI paddle
+            if (450 <= ball_x + ball_size <= 460 and ai_y <= ball_y + ball_size/2 <= ai_y + paddle_height):
+                ball_dx = -abs(ball_dx)
+
+            # Ball out of bounds (score)
+            if ball_x < 0:
+                ai_score += 1
+                reset_ball()
+            elif ball_x > 480:
+                player_score += 1
+                reset_ball()
+
+            # AI paddle movement (simple)
+            if ai_y + paddle_height/2 < ball_y:
+                ai_y += 4
+            elif ai_y + paddle_height/2 > ball_y:
+                ai_y -= 4
+            ai_y = max(0, min(360 - paddle_height, ai_y))
+
+            draw()
+            if player_score == 5 or ai_score == 5:
+                running[0] = False
+                winner = "Player" if player_score == 5 else "AI"
+                canvas.create_text(240, 180, text=f"{winner} Wins!", fill="#FF5252", font=("Helvetica", 24, "bold"))
+                pong_win.after(2000, pong_win.destroy)
+                return
+
+            pong_win.after(30, move_ball)
+
+        def reset_ball():
+            nonlocal ball_x, ball_y, ball_dx, ball_dy
+            ball_x, ball_y = 240, 180
+            ball_dx = -ball_dx
+
+        def on_key(event):
+            nonlocal player_y
+            if event.keysym == "Up":
+                player_y = max(0, player_y - 20)
+            elif event.keysym == "Down":
+                player_y = min(360 - paddle_height, player_y + 20)
+
+        pong_win.bind("<Key>", on_key)
+        draw()
+        move_ball()
+        pong_win.focus_set()
 
 if __name__ == "__main__":
     os.system('cls||clear')  # Clear the console even for stupid macs
