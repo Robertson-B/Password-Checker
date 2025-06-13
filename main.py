@@ -14,7 +14,7 @@ import json # For achievement storage
 
 
 # Define a modern color palette for the app
-COLORS = { # I realised i used the american spelling after i had already used it 194 times, so i just kept it.
+COLORS = { # Custom Tkinter requires the american spelling of Colour for elements like fg_color because it is stupid and american
     "background": "#F0F4F8",  
     "header": "#005A9E", 
     "text_primary": "#333333",  
@@ -47,6 +47,8 @@ ALL_ACHIEVEMENTS = {
     "Dark Mode": "You enabled the secret dark mode!",
     "Tacocat": "Palindromes are cool!",
     "Critic": "Thanks for the feedback",
+    "Rejected": "You got rejected by the password checker!",
+    "The Chosen One": "He lives.",
     "Admin": "You found the developer area with all the secrets and easter eggs!",
 }
 
@@ -486,16 +488,25 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         else:
             # Easter egg for specific passwords
             if password.lower() in ["fong", "fongy", "mrfong"]:
-                self.result_label.configure(text="Terrible", text_color="#FF5252")  # Red for bad passwords
-                self.feedback_label.configure(text="That's a crap password Fong! Try something more original!")
+                self.result_label.configure(text="The Chosen One!", text_color="#FF0000")  # Red for bad passwords
+                self.feedback_label.configure(text="The legends predicted his arrival!")
+                self.unlock_achievement("The Chosen One", "He lives.")
                 self.time_to_crack_label.configure(text="")
-                self.pwned_count_label.configure(text="")  # Clear pwned count
+                self.pwned_count_label.configure(text="")
+                if self.secret_theme_on:
+                    self.strength_bar.configure(progress_color="#504c54")
+                else:
+                    self.strength_bar.configure(progress_color="#989ca4")
                 return
             elif password.lower() == "upupdowndownleftrightleftrightba": # Secret code. I wonder where else this pops up?
                 self.result_label.configure(text="Easter Egg!", text_color="#FFC107")
                 self.feedback_label.configure(text="Konami Code detected! Unfortunately, no extra lives here.")
                 self.time_to_crack_label.configure(text="")
                 self.pwned_count_label.configure(text="")
+                if self.secret_theme_on:
+                    self.strength_bar.configure(progress_color="#504c54")
+                else:
+                    self.strength_bar.configure(progress_color="#989ca4")
                 return
             elif password.lower() == "nevergonnagiveyouup": # Lol
                 self.result_label.configure(text="Rickrolled!", text_color="#FFC107")
@@ -504,25 +515,47 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
                 self.pwned_count_label.configure(text="")
                 self.unlock_achievement("Rickrolled", "Never gonna give rickrolling you up!") 
                 webbrowser.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ") # Opens Rick Astley's "Never Gonna Give You Up" music video
-                return
+                if self.secret_theme_on:
+                    self.strength_bar.configure(progress_color="#504c54")
+                else:
+                    self.strength_bar.configure(progress_color="#989ca4")
+            elif password.lower() == "letmein":
+                self.result_label.configure(text="No!", text_color="#FF0707")
+                self.feedback_label.configure(text="Get rejected LOL.")
+                self.time_to_crack_label.configure(text="")
+                self.pwned_count_label.configure(text="")
+                self.unlock_achievement("Rejected", "You got rejected by the password checker!")
+                if self.secret_theme_on:
+                    self.strength_bar.configure(progress_color="#504c54")
+                else:
+                    self.strength_bar.configure(progress_color="#989ca4")
             elif password.lower() in ["bitrealm", "bitrealmgames", "robertson", "brobertson", "bean", "ben","benjamin"]:
                 self.result_label.configure(text="Imposter!", text_color="#FFC107")
                 self.feedback_label.configure(text="Trying to impersonate the developer? Nice try!")
                 self.time_to_crack_label.configure(text="")
                 self.pwned_count_label.configure(text="")
-                return
+                if self.secret_theme_on:
+                    self.strength_bar.configure(progress_color="#504c54")
+                else:
+                    self.strength_bar.configure(progress_color="#989ca4")
             elif password.lower() in ["1337", "h4x0r", "leet", "l33t", "hacker", "h4cker"]:
                 self.result_label.configure(text="Leet Detected!", text_color="#FFC107")
                 self.feedback_label.configure(text="Leet detected! Hack the planet!")
                 self.time_to_crack_label.configure(text="")
                 self.pwned_count_label.configure(text="")
-                return
+                if self.secret_theme_on:
+                    self.strength_bar.configure(progress_color="#504c54")
+                else:
+                    self.strength_bar.configure(progress_color="#989ca4")
             elif password.lower() == "drowssap":
                 self.result_label.configure(text="Sneaky!", text_color="#FFC107")
                 self.feedback_label.configure(text="Trying to be sneaky? 'password' backwards is still weak!")
                 self.time_to_crack_label.configure(text="")
                 self.pwned_count_label.configure(text="")
-                return
+                if self.secret_theme_on:
+                    self.strength_bar.configure(progress_color="#504c54")
+                else:
+                    self.strength_bar.configure(progress_color="#989ca4")
             # Palindrome password easter egg
             elif password and password.lower() == password.lower()[::-1] and len(password) > 2:
                 self.result_label.configure(text="Palindrome!", text_color="#FFC107")
@@ -530,25 +563,37 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
                 self.time_to_crack_label.configure(text="")
                 self.pwned_count_label.configure(text="")
                 self.unlock_achievement("Tacocat", "Palindromes are cool!")
-                return
+                if self.secret_theme_on:
+                    self.strength_bar.configure(progress_color="#504c54")
+                else:
+                    self.strength_bar.configure(progress_color="#989ca4")
             elif password.lower() == "maytheforcebewithyou":
                 self.result_label.configure(text="Star Wars!", text_color="#FFC107")
                 self.feedback_label.configure(text="The Force is strong with you, but not this password.")
                 self.time_to_crack_label.configure(text="")
                 self.pwned_count_label.configure(text="")
-                return
+                if self.secret_theme_on:
+                    self.strength_bar.configure(progress_color="#504c54")
+                else:
+                    self.strength_bar.configure(progress_color="#989ca4")
             elif password.lower() == "iloveyou3000":
                 self.result_label.configure(text="Iron Man!", text_color="#FFC107")
                 self.feedback_label.configure(text="Iron Man approves, but hackers do too!")
                 self.time_to_crack_label.configure(text="")
                 self.pwned_count_label.configure(text="")
-                return
+                if self.secret_theme_on:
+                    self.strength_bar.configure(progress_color="#504c54")
+                else:
+                    self.strength_bar.configure(progress_color="#989ca4")
             elif self.is_password_in_github_list(password): # Check against GitHub password list
                 self.result_label.configure(text="Common", text_color="#FF5252")
                 self.feedback_label.configure(text="This password appears in a public list and is really common. Choose another one!")
                 self.time_to_crack_label.configure(text="")
                 self.pwned_count_label.configure(text="")
-                return
+                if self.secret_theme_on:
+                    self.strength_bar.configure(progress_color="#504c54")
+                else:
+                    self.strength_bar.configure(progress_color="#989ca4")
             else:
                 # Regular password strength evaluation
                 strength, color, feedback, time_to_crack = self.evaluate_password(password)
@@ -1111,9 +1156,9 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
 
             # AI paddle movement (slower)
             if ai_y + paddle_height/2 < ball_y:
-                ai_y += 5
+                ai_y += 7
             elif ai_y + paddle_height/2 > ball_y:
-                ai_y -= 5
+                ai_y -= 7
             ai_y = max(0, min(360 - paddle_height, ai_y))
 
             draw()
