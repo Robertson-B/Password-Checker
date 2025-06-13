@@ -14,7 +14,7 @@ import json # For achievement storage
 
 
 # Define a modern color palette for the app
-COLORS = {
+COLORS = { # I realised i used the american spelling after i had already used it 194 times, so i just kept it.
     "background": "#F0F4F8",  
     "header": "#005A9E", 
     "text_primary": "#333333",  
@@ -34,15 +34,19 @@ COLORS = {
 ALLOWED_PASSWORD_CHARS = string.ascii_letters + string.digits + "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
 
 ALL_ACHIEVEMENTS = {
-    "Egg Hunter": "You found all the easter eggs!",
+    "Egg Hunter": "Get the platinum trophy!",
     "First Check!": "You checked your first password.",
     "Century Checker": "You've checked 100 passwords!",
     "Snake Charmer": "You won the Snake minigame!",
     "Pong Pro": "You won the Pong minigame!",
+    "Rickrolled": "Never gonna give rickrolling you up!",
     "Button Masher": "You clicked the eye button 150 times!",
     "Ready player one": "You found Halliday's egg!",
     "Funny guy": "Hope you enjoyed the joke!",
     "Self-Destructed": "You activated the self-destruct sequence!",
+    "Dark Mode": "You enabled the secret dark mode!",
+    "Tacocat": "Palindromes are cool!",
+    "Critic": "Thanks for the feedback",
     "Admin": "You found the developer area with all the secrets and easter eggs!",
 }
 
@@ -443,7 +447,13 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
             cursor="hand2"
         )
         email_link.pack(padx=20, pady=(0, 20))
-        email_link.bind("<Button-1>", lambda e: webbrowser.open("mailto:BitRealmgames@gmail.com"))
+        email_link.bind(
+            "<Button-1>",
+            lambda e: (
+                self.unlock_achievement("Critic", "Thanks for the feedback"),
+                webbrowser.open("mailto:BitRealmgames@gmail.com")
+            )
+        )
         # Opens the default email client with my email address when clicked
 
         self.about_win.attributes("-topmost", True)
@@ -492,6 +502,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
                 self.feedback_label.configure(text="🎵 Never gonna let you down... but this password will!")
                 self.time_to_crack_label.configure(text="")
                 self.pwned_count_label.configure(text="")
+                self.unlock_achievement("Rickrolled", "Never gonna give rickrolling you up!") 
                 webbrowser.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ") # Opens Rick Astley's "Never Gonna Give You Up" music video
                 return
             elif password.lower() in ["bitrealm", "bitrealmgames", "robertson", "brobertson", "bean", "ben","benjamin"]:
@@ -518,6 +529,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
                 self.feedback_label.configure(text="Cool, your password is a palindrome!")
                 self.time_to_crack_label.configure(text="")
                 self.pwned_count_label.configure(text="")
+                self.unlock_achievement("Tacocat", "Palindromes are cool!")
                 return
             elif password.lower() == "maytheforcebewithyou":
                 self.result_label.configure(text="Star Wars!", text_color="#FFC107")
@@ -755,6 +767,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         # Toggle a secret dark theme on double-clicking the header
         if not self.secret_theme_on:
             ctk.set_appearance_mode("dark")
+            self.unlock_achievement("Dark Mode", "You enabled the secret dark mode!")
             self.header_frame.configure(fg_color="#333333")
             self.header_label.configure(text_color="#FFFFFF")
             self.sub_header_label.configure(text_color="#DDDDDD")
@@ -1047,7 +1060,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         ball_size = 15
         player_y = 150
         ai_y = 150
-        ball_speed = 4  # initial speed
+        ball_speed = 5  # initial speed
         ball_x, ball_y = 240, 180  # Center of the canvas
         ball_dx, ball_dy = ball_speed, ball_speed
         player_score = 0
@@ -1098,9 +1111,9 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
 
             # AI paddle movement (slower)
             if ai_y + paddle_height/2 < ball_y:
-                ai_y += 4
+                ai_y += 5
             elif ai_y + paddle_height/2 > ball_y:
-                ai_y -= 4
+                ai_y -= 5
             ai_y = max(0, min(360 - paddle_height, ai_y))
 
             draw()
@@ -1121,7 +1134,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         def reset_ball():
             nonlocal ball_x, ball_y, ball_dx, ball_dy, ball_speed
             ball_x, ball_y = 240, 180  # Center
-            ball_speed = 4
+            ball_speed = 5
             # Randomize direction
             ball_dx = random.choice([-ball_speed, ball_speed])
             ball_dy = random.choice([-ball_speed, ball_speed])
@@ -1241,7 +1254,6 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
             # No file or error, just start fresh
             self.achievements = set()
             self.password_checks = 0
-
 
 if __name__ == "__main__":
     os.system('cls||clear')  # Clear the console even for stupid macs
