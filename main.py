@@ -49,7 +49,7 @@ ALL_ACHIEVEMENTS = {
     "Critic": "Thanks for the feedback",
     "Rejected": "You got rejected by the password checker!",
     "The Chosen One": "He lives.",
-    "Admin": "You found the developer area with all the secrets and easter eggs!",
+    "Admin": "You found the developer area with all the secrets and easter eggs! Yes I actually built a website just for that.",
 }
 
 class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
@@ -970,26 +970,14 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
                 popup.lift()
 
     def open_dev_area(self): 
+        path = os.path.abspath("index.html")  # or use the full path if needed
+        webbrowser.open(f"file:///{path.replace(os.sep, '/')}")
+        self.unlock_achievement("Admin", "You found the developer area with all the secrets and easter eggs! Yes I actually built a website just for that.")
         # Trying to cheat and see all the easter eggs of the program? Well, you have to answer some questions first.
-        secrets_b64 = b'CiAgICBTZWNyZXQgcGFzc3dvcmRzOgogICAgS29uYW1pIGNvZGU6IHVwdXBkb3duZG93bmxlZnRyaWdodGxlZnRyaWdodGJhCiAgICBSaWNrcm9sbDogbmV2ZXJnb25uYWdpdmV5b3V1cAogICAgUGFsaW5kcm9tZSBwYXNzd29yZDogYW55IHBhbGluZHJvbWUKICAgIFN0YXIgV2FyczogbWF5dGhlZm9yY2ViZXdpdGh5b3UKICAgIElyb24gTWFuOiBpbG92ZXlvdTMwMDAKICAgIExlZXQgc3BlYWs6IDEzMzcsIGg0eDByLCBsZWV0LCBsMzN0LCBoYWNrZXIsIGg0Y2tlcgogICAgc25lYWt5IHBhc3N3b3JkOiBkcm93c3NhcAogICAgSW1wb3N0ZXI6IGJpdHJlYWxtLCBiaXRyZWFsbWdhbWVzLCByb2JlcnRzb24sIGJyb2JlcnRzb24sIGJlYW4sIGJlbiwgYmVuamFtaW4KICAgIEZvbmcncyBwYXNzd29yZHM6IGZvbmcsIGZvbmd5LCBtcmZvbmcKICAgIFNlY3JldCBidXR0b25zOgogICAgUmFuZG9tIEpva2U6IHRpbnkgZG90IGJ1dHRvbiBpbiBib3R0b20gcmlnaHQgY29ybmVyCiAgICBLZWVwIGNsaWNraW5nIHRoZSBleWUgYnV0dG9uCiAgICBEYXJrIG1vZGU6IGRvdWJsZS1jbGljayB0aGUgaGVhZGVyCiAgICBTZWNyZXQgY29tbWFuZHMKICAgIEhhbGxpZGF5J3MgRWdnOiBVcCBEb3duIERvd24gTGVmdCBSaWdodCBMZWZ0IFJpZ2h0IEIgQQogICAgU25ha2UgTWluaWdhbWU6IFR5cGUgJ3NuYWtlZ2FtZScKICAgIFBvbmcgTWluaWdhbWU6IFR5cGUgJ3Bpbmdwb25nJwogICAgU2VsZi1EZXN0cnVjdDogRXNjYXBlIGtleQogICAgVGhhbmtzIHlvdSBmb3IgdXNpbmcgdGhpcyBhcHAh'
-        secrets = base64.b64decode(secrets_b64).decode("utf-8").splitlines()
-        popup = ctk.CTkToplevel(self)
-        popup.title("Developer Area - All Secrets")
-        popup.geometry("500x600")
-        popup.resizable(False, False)
-        popup.configure(fg_color=COLORS["window_bg"])
-        self.unlock_achievement("Admin", "You found the developer area with all the secrets and easter eggs!")
-        label = ctk.CTkLabel(
-            popup,
-            text="Welcome to the Developer Area! Here are some secrets and easter eggs:\n\n" + "\n".join(f"- {s}" for s in secrets),
-            font=("Helvetica", 13),
-            justify="left",
-            wraplength=480,
-            text_color= "#FFFFFF"
-        )
-        label.pack(expand=True, fill="both", padx=20, pady=20)
-        popup.attributes("-topmost", True)
-        popup.lift()
+        #secrets_b64 = b'CiAgICBTZWNyZXQgcGFzc3dvcmRzOgogICAgS29uYW1pIGNvZGU6IHVwdXBkb3duZG93bmxlZnRyaWdodGxlZnRyaWdodGJhCiAgICBSaWNrcm9sbDogbmV2ZXJnb25uYWdpdmV5b3V1cAogICAgUGFsaW5kcm9tZSBwYXNzd29yZDogYW55IHBhbGluZHJvbWUKICAgIFN0YXIgV2FyczogbWF5dGhlZm9yY2ViZXdpdGh5b3UKICAgIElyb24gTWFuOiBpbG92ZXlvdTMwMDAKICAgIExlZXQgc3BlYWs6IDEzMzcsIGg0eDByLCBsZWV0LCBsMzN0LCBoYWNrZXIsIGg0Y2tlcgogICAgc25lYWt5IHBhc3N3b3JkOiBkcm93c3NhcAogICAgSW1wb3N0ZXI6IGJpdHJlYWxtLCBiaXRyZWFsbWdhbWVzLCByb2JlcnRzb24sIGJyb2JlcnRzb24sIGJlYW4sIGJlbiwgYmVuamFtaW4KICAgIEZvbmcncyBwYXNzd29yZHM6IGZvbmcsIGZvbmd5LCBtcmZvbmcKICAgIFNlY3JldCBidXR0b25zOgogICAgUmFuZG9tIEpva2U6IHRpbnkgZG90IGJ1dHRvbiBpbiBib3R0b20gcmlnaHQgY29ybmVyCiAgICBLZWVwIGNsaWNraW5nIHRoZSBleWUgYnV0dG9uCiAgICBEYXJrIG1vZGU6IGRvdWJsZS1jbGljayB0aGUgaGVhZGVyCiAgICBTZWNyZXQgY29tbWFuZHMKICAgIEhhbGxpZGF5J3MgRWdnOiBVcCBEb3duIERvd24gTGVmdCBSaWdodCBMZWZ0IFJpZ2h0IEIgQQogICAgU25ha2UgTWluaWdhbWU6IFR5cGUgJ3NuYWtlZ2FtZScKICAgIFBvbmcgTWluaWdhbWU6IFR5cGUgJ3Bpbmdwb25nJwogICAgU2VsZi1EZXN0cnVjdDogRXNjYXBlIGtleQogICAgVGhhbmtzIHlvdSBmb3IgdXNpbmcgdGhpcyBhcHAh'
+        #secrets = base64.b64decode(secrets_b64).decode("utf-8").splitlines()
+
+
 
     def show_dev_area_button(self, event=None):
         # Place the dev area button at the bottom left
