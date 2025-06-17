@@ -9,7 +9,6 @@ import urllib.request # For checking if the password is in a public GitHub list 
 import webbrowser # For easter eggs
 import pwnedpass # For checking if the password has been pwned in data breaches
 import tkinter as tk # for secret minigames
-import base64 # For encoding secrets
 import json # For achievement storage
 
 
@@ -49,6 +48,7 @@ ALL_ACHIEVEMENTS = {
     "Critic": "Thanks for the feedback",
     "Rejected": "You got rejected by the password checker!",
     "The Chosen One": "He lives.",
+    "Distracted": "You distracted the password checker!",
     "Admin": "You found the developer area with all the secrets and easter eggs! Yes I actually built a website just for that.",
 }
 
@@ -529,6 +529,17 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
                     self.strength_bar.configure(progress_color="#504c54")
                 else:
                     self.strength_bar.configure(progress_color="#989ca4")
+            elif password.lower() == "distraction":
+                self.result_label.configure(text="Distracted!", text_color="#FF0707")
+                self.feedback_label.configure(text="Quick, distract them.")
+                self.time_to_crack_label.configure(text="")
+                self.pwned_count_label.configure(text="")
+                self.unlock_achievement("Distracted", "You distracted the password checker!")
+                webbrowser.open("https://www.youtube.com/watch?v=XP_ZivuN6iY")
+                if self.secret_theme_on:
+                    self.strength_bar.configure(progress_color="#504c54")
+                else:
+                    self.strength_bar.configure(progress_color="#989ca4")
             elif password.lower() in ["bitrealm", "bitrealmgames", "robertson", "brobertson", "bean", "ben","benjamin"]:
                 self.result_label.configure(text="Imposter!", text_color="#FFC107")
                 self.feedback_label.configure(text="Trying to impersonate the developer? Nice try!")
@@ -973,9 +984,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         path = os.path.abspath("index.html")  # or use the full path if needed
         webbrowser.open(f"file:///{path.replace(os.sep, '/')}")
         self.unlock_achievement("Admin", "You found the developer area with all the secrets and easter eggs! Yes I actually built a website just for that.")
-        # Trying to cheat and see all the easter eggs of the program? Well, you have to answer some questions first.
-        #secrets_b64 = b'CiAgICBTZWNyZXQgcGFzc3dvcmRzOgogICAgS29uYW1pIGNvZGU6IHVwdXBkb3duZG93bmxlZnRyaWdodGxlZnRyaWdodGJhCiAgICBSaWNrcm9sbDogbmV2ZXJnb25uYWdpdmV5b3V1cAogICAgUGFsaW5kcm9tZSBwYXNzd29yZDogYW55IHBhbGluZHJvbWUKICAgIFN0YXIgV2FyczogbWF5dGhlZm9yY2ViZXdpdGh5b3UKICAgIElyb24gTWFuOiBpbG92ZXlvdTMwMDAKICAgIExlZXQgc3BlYWs6IDEzMzcsIGg0eDByLCBsZWV0LCBsMzN0LCBoYWNrZXIsIGg0Y2tlcgogICAgc25lYWt5IHBhc3N3b3JkOiBkcm93c3NhcAogICAgSW1wb3N0ZXI6IGJpdHJlYWxtLCBiaXRyZWFsbWdhbWVzLCByb2JlcnRzb24sIGJyb2JlcnRzb24sIGJlYW4sIGJlbiwgYmVuamFtaW4KICAgIEZvbmcncyBwYXNzd29yZHM6IGZvbmcsIGZvbmd5LCBtcmZvbmcKICAgIFNlY3JldCBidXR0b25zOgogICAgUmFuZG9tIEpva2U6IHRpbnkgZG90IGJ1dHRvbiBpbiBib3R0b20gcmlnaHQgY29ybmVyCiAgICBLZWVwIGNsaWNraW5nIHRoZSBleWUgYnV0dG9uCiAgICBEYXJrIG1vZGU6IGRvdWJsZS1jbGljayB0aGUgaGVhZGVyCiAgICBTZWNyZXQgY29tbWFuZHMKICAgIEhhbGxpZGF5J3MgRWdnOiBVcCBEb3duIERvd24gTGVmdCBSaWdodCBMZWZ0IFJpZ2h0IEIgQQogICAgU25ha2UgTWluaWdhbWU6IFR5cGUgJ3NuYWtlZ2FtZScKICAgIFBvbmcgTWluaWdhbWU6IFR5cGUgJ3Bpbmdwb25nJwogICAgU2VsZi1EZXN0cnVjdDogRXNjYXBlIGtleQogICAgVGhhbmtzIHlvdSBmb3IgdXNpbmcgdGhpcyBhcHAh'
-        #secrets = base64.b64decode(secrets_b64).decode("utf-8").splitlines()
+        # Trying to cheat and see all the easter eggs of the program? Well, you have to answer some questions first. 
 
 
 
