@@ -48,7 +48,10 @@ ALL_ACHIEVEMENTS = {
     "Critic": "Thanks for the feedback",
     "Rejected": "You got rejected by the password checker!",
     "The Chosen One": "He lives.",
-    "Distracted": "You distracted the password checker!",
+    "Distracted": "You distracted the password checker!", 
+    "Minesweeper Master": "You won the Minesweeper minigame!",
+    "Tic-Tac-Toe Champ": "You won the Tic-Tac-Toe!",
+    "Memory Master": "You won the Memory Match minigame!",
     "Admin": "You found the developer area with all the secrets and easter eggs! Yes I actually built a website just for that.",
 }
 
@@ -77,6 +80,12 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         self.minigame_code = "snakegame"
         self.pong_code_progress = ""
         self.pong_code = "pingpong"
+        self.minesweeper_code_progress = ""
+        self.minesweeper_code = "minesweeper"
+        self.tictactoe_code_progress = ""
+        self.tictactoe_code = "tictactoe"
+        self.memorymatch_code_progress = ""
+        self.memorymatch_code = "memorymatch"
 
         # Bind key events for secret buttons and Easter eggs
         self.bind_all("<Key>", self.key_listener)
@@ -807,6 +816,36 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
                 self.pong_code_progress = ""
         else:
             self.pong_code_progress = ""
+            
+        if event.char.isalnum():
+            self.minesweeper_code_progress += event.char.lower()
+            if len(self.minesweeper_code_progress) > len(self.minesweeper_code):
+                self.minesweeper_code_progress = self.minesweeper_code_progress[-len(self.minesweeper_code):]
+            if self.minesweeper_code_progress == self.minesweeper_code:
+                self.launch_minesweeper_minigame()
+                self.minesweeper_code_progress = ""
+        else:
+            self.minesweeper_code_progress = ""
+            
+        if event.char.isalnum():
+            self.tictactoe_code_progress += event.char.lower()
+            if len(self.tictactoe_code_progress) > len(self.tictactoe_code):
+                self.tictactoe_code_progress = self.tictactoe_code_progress[-len(self.tictactoe_code):]
+            if self.tictactoe_code_progress == self.tictactoe_code:
+                self.launch_tictactoe_minigame()
+                self.tictactoe_code_progress = ""
+        else:
+            self.tictactoe_code_progress = ""
+
+        if event.char.isalnum():
+            self.memorymatch_code_progress += event.char.lower()
+            if len(self.memorymatch_code_progress) > len(self.memorymatch_code):
+                self.memorymatch_code_progress = self.memorymatch_code_progress[-len(self.memorymatch_code):]
+            if self.memorymatch_code_progress == self.memorymatch_code:
+                self.launch_memory_match_minigame()
+                self.memorymatch_code_progress = ""
+        else:
+            self.memorymatch_code_progress = ""
 
     def show_hidden_button(self):
         # Place the hidden button next to the self-destruct button at the bottom right
@@ -1195,6 +1234,264 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         draw()
         move_ball()
         pong_win.focus_set()
+
+    def launch_minesweeper_minigame(self):
+        rows, cols, mines = 8, 8, 10
+
+        win = tk.Toplevel(self)
+        win.title("💣 Minesweeper 💣")
+        win.resizable(False, False)
+        frame = tk.Frame(win, bg="#222831")
+        frame.pack(padx=10, pady=10)
+
+        # Initialize board
+        board = [[0 for _ in range(cols)] for _ in range(rows)]
+        revealed = [[False for _ in range(cols)] for _ in range(rows)]
+        buttons = [[None for _ in range(cols)] for _ in range(rows)]
+        flags = [[False for _ in range(cols)] for _ in range(rows)]
+
+        # Place mines
+        mine_positions = set()
+        while len(mine_positions) < mines:
+            r, c = random.randint(0, rows-1), random.randint(0, cols-1)
+            mine_positions.add((r, c))
+        for r, c in mine_positions:
+            board[r][c] = -1
+
+        # Calculate numbers
+        for r in range(rows):
+            for c in range(cols):
+                if board[r][c] == -1:
+                    continue
+                count = 0
+                for dr in [-1, 0, 1]:
+                    for dc in [-1, 0, 1]:
+                        nr, nc = r + dr, c + dc
+                        if 0 <= nr < rows and 0 <= nc < cols and board[nr][nc] == -1:
+                            count += 1
+                board[r][c] = count
+
+        def reveal(r, c):
+            if revealed[r][c] or flags[r][c]:
+                return
+            revealed[r][c] = True
+            btn = buttons[r][c]
+            if board[r][c] == -1:
+                btn.config(text="💣", bg="#FF5252", disabledforeground="#000")
+                for (mr, mc) in mine_positions:
+                    buttons[mr][mc].config(text="💣", bg="#FF5252", disabledforeground="#000")
+                win.title("Game Over!")
+                for row in buttons:
+                    for b in row:
+                        b.config(state="disabled")
+                win.after(3000, win.destroy)
+                return
+            btn.config(relief="sunken", state="disabled", bg="#444", text=str(board[r][c]) if board[r][c] > 0 else "", disabledforeground="#FFD700")
+            if board[r][c] == 0:
+                for dr in [-1, 0, 1]:
+                    for dc in [-1, 0, 1]:
+                        nr, nc = r + dr, c + dc
+                        if 0 <= nr < rows and 0 <= nc < cols:
+                            reveal(nr, nc)
+            check_win()
+
+        def flag(r, c):
+            if revealed[r][c]:
+                return
+            flags[r][c] = not flags[r][c]
+            btn = buttons[r][c]
+            btn.config(text="🚩" if flags[r][c] else "")
+
+        def on_click(r, c, event):
+            if event.num == 1:  # Left click
+                reveal(r, c)
+            elif event.num == 3:  # Right click
+                flag(r, c)
+
+        def check_win():
+            for r in range(rows):
+                for c in range(cols):
+                    if board[r][c] != -1 and not revealed[r][c]:
+                        return
+            win.title("You Win!")
+            for row in buttons:
+                for b in row:
+                    b.config(state="disabled")
+            try:
+                self.unlock_achievement("Minesweeper Master", "You won the Minesweeper minigame!")
+            except Exception:
+                pass
+
+        # Create buttons
+        for r in range(rows):
+            for c in range(cols):
+                btn = tk.Button(frame, width=3, height=1, font=("Helvetica", 14, "bold"), bg="#393e46", fg="#FFD700", relief="raised")
+                btn.grid(row=r, column=c, padx=1, pady=1)
+                btn.bind("<Button-1>", lambda e, r=r, c=c: on_click(r, c, e))
+                btn.bind("<Button-3>", lambda e, r=r, c=c: on_click(r, c, e))
+                buttons[r][c] = btn
+
+        # --- Uncover some safe tiles at the start ---
+        safe_to_reveal = []
+        for r in range(rows):
+            for c in range(cols):
+                if board[r][c] != -1:
+                    safe_to_reveal.append((r, c))
+        random.shuffle(safe_to_reveal)
+        revealed_count = 0
+        for r, c in safe_to_reveal:
+            if revealed_count >= 5:
+                break
+            if not revealed[r][c]:
+                reveal(r, c)
+                revealed_count += 1
+        win.focus_set()
+        win.grab_set()
+
+    def launch_tictactoe_minigame(self):
+        win = tk.Toplevel(self)
+        win.title("Tic-Tac-Toe")
+        win.resizable(False, False)
+        frame = tk.Frame(win, bg="#222831")
+        frame.pack(padx=10, pady=10)
+
+        board = [["" for _ in range(3)] for _ in range(3)]
+        buttons = [[None for _ in range(3)] for _ in range(3)]
+        player = ["X"]  # Player always starts
+
+        def check_winner():
+            # Rows, columns, diagonals
+            lines = board + [list(col) for col in zip(*board)]
+            lines.append([board[i][i] for i in range(3)])
+            lines.append([board[i][2-i] for i in range(3)])
+            for line in lines:
+                if line == ["X"]*3:
+                    return "Player"
+                if line == ["O"]*3:
+                    return "AI"
+            if all(board[r][c] for r in range(3) for c in range(3)):
+                return "Draw"
+            return None
+
+        def ai_move():
+            empty = [(r, c) for r in range(3) for c in range(3) if not board[r][c]]
+            if not empty:
+                return
+            r, c = random.choice(empty)
+            board[r][c] = "O"
+            buttons[r][c].config(text="O", state="disabled", disabledforeground="#FF5252")
+            winner = check_winner()
+            if winner:
+                end_game(winner)
+
+        def on_click(r, c):
+            if board[r][c]:
+                return
+            board[r][c] = "X"
+            buttons[r][c].config(text="X", state="disabled", disabledforeground="#4CAF50")
+            winner = check_winner()
+            if winner:
+                end_game(winner)
+                return
+            ai_move()
+            winner = check_winner()
+            if winner:
+                end_game(winner)
+
+        def end_game(winner):
+            for row in buttons:
+                for btn in row:
+                    btn.config(state="disabled")
+            if winner == "Player":
+                win.title("You Win!")
+                try:
+                    self.unlock_achievement("Tic-Tac-Toe Champ", "You won the Tic-Tac-Toe!")
+                except Exception:
+                    pass
+            elif winner == "AI":
+                win.title("AI Wins!")
+            else:
+                win.title("Draw!")
+
+            win.after(2000, win.destroy)
+
+        for r in range(3):
+            for c in range(3):
+                btn = tk.Button(frame, width=4, height=2, font=("Helvetica", 20, "bold"), bg="#393e46", fg="#FFD700", relief="raised",
+                                command=lambda r=r, c=c: on_click(r, c))
+                btn.grid(row=r, column=c, padx=2, pady=2)
+                buttons[r][c] = btn
+
+        win.focus_set()
+        win.grab_set()
+
+
+    def launch_memory_match_minigame(self):
+        win = tk.Toplevel(self)
+        win.title("Memory Match")
+        win.resizable(False, False)
+        frame = tk.Frame(win, bg="#222831")
+        frame.pack(padx=10, pady=10)
+
+        # Setup cards (8 pairs, shuffled)
+        symbols = ["🍎", "🍌", "🍇", "🍒", "🍉", "🍋", "🍓", "🍍"]
+        cards = symbols * 2
+        random.shuffle(cards)
+
+        rows, cols = 4, 4
+        buttons = [[None for _ in range(cols)] for _ in range(rows)]
+        revealed = [[False for _ in range(cols)] for _ in range(rows)]
+        matched = [[False for _ in range(cols)] for _ in range(rows)]
+        first = [None]  # [row, col]
+        lock = [False]
+        matches_found = [0]
+
+        def check_win():
+            if matches_found[0] == 8:
+                win.title("You Win!")
+                try:
+                    self.unlock_achievement("Memory Master", "You won the Memory Match minigame!")
+                except Exception:
+                    pass
+                win.after(2000, win.destroy)
+
+        def on_click(r, c):
+            if lock[0] or revealed[r][c] or matched[r][c]:
+                return
+            btn = buttons[r][c]
+            btn.config(text=cards[r*cols+c], state="disabled", disabledforeground="#FFD700", bg="#444")
+            revealed[r][c] = True
+            if first[0] is None:
+                first[0] = (r, c)
+            else:
+                r1, c1 = first[0]
+                if cards[r1*cols+c1] == cards[r*cols+c]:
+                    matched[r1][c1] = matched[r][c] = True
+                    matches_found[0] += 1
+                    first[0] = None
+                    check_win()
+                else:
+                    lock[0] = True
+                    win.after(800, lambda: hide_cards(r1, c1, r, c))
+
+        def hide_cards(r1, c1, r2, c2):
+            buttons[r1][c1].config(text="", state="normal", bg="#393e46")
+            buttons[r2][c2].config(text="", state="normal", bg="#393e46")
+            revealed[r1][c1] = revealed[r2][c2] = False
+            first[0] = None
+            lock[0] = False
+
+        # Create buttons
+        for r in range(rows):
+            for c in range(cols):
+                btn = tk.Button(frame, width=4, height=2, font=("Helvetica", 20, "bold"),
+                                bg="#393e46", fg="#FFD700", relief="raised",
+                                command=lambda r=r, c=c: on_click(r, c))
+                btn.grid(row=r, column=c, padx=2, pady=2)
+                buttons[r][c] = btn
+
+        win.focus_set()
+        win.grab_set()
 
     def unlock_achievement(self, name, description):
         if name not in self.achievements:
