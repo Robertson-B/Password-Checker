@@ -1,21 +1,24 @@
-import customtkinter as ctk # Better than tkinter and gooeypie
-import math # For entropy
-import re # Regular expressions for password checking
-from decimal import Decimal # Allows the program to store massive numbers
-import random  # For generating random passwords
-import string  # For generating random passwords
-import os  # For clearing the console
-import urllib.request # For checking if the password is in a public GitHub list of common passwords
-import webbrowser # For easter eggs
-import pwnedpass # For checking if the password has been pwned in data breaches
-import tkinter as tk # for secret minigames
-import json # For achievement storage
-import time # For timing password checks
-import datetime # For seeing how degenerate you are with your password checks
+import math   # For entropy
+import re   # Regular expressions for password checking
+from decimal import Decimal   # Allows the program to store massive numbers
+import random   # For generating random passwords
+import string   # For generating random passwords
+import os   # For clearing the console
+import urllib.request   # For checking if the password is in a public GitHub list of common passwords
+import webbrowser   # For easter eggs
+import tkinter as tk   # for secret minigames
+import json   # For achievement storage
+import time   # For timing password checks
+import datetime   # For seeing how degenerate you are with your password checks
+import threading # For a cool intro in the terminal
 
+import pwnedpass   # For checking if the password has been pwned in data breaches
+import customtkinter as ctk   # Better than tkinter and gooeypie
+from terminaltexteffects.effects.effect_blackhole import Blackhole  # For the blackhole effect on the console
 
 # Define a modern color palette for the app
-COLORS = { # Custom Tkinter requires the american spelling of Colour for elements like fg_color because it is stupid and american
+COLORS = {
+    # Custom Tkinter requires the american spelling of Colour for elements like fg_color because it is stupid and american
     "background": "#F0F4F8",  
     "header": "#005A9E", 
     "text_primary": "#333333",  
@@ -34,7 +37,8 @@ COLORS = { # Custom Tkinter requires the american spelling of Colour for element
 # Define allowed characters for password input
 ALLOWED_PASSWORD_CHARS = string.ascii_letters + string.digits + "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
 
-ALL_ACHIEVEMENTS = {
+ALL_ACHIEVEMENTS = { 
+    # Fun acheivements to unlock
     "Egg Hunter": "Get the platinum trophy!",
     "First Check!": "You checked your first password.",
     "Century Checker": "You've checked 100 passwords!",
@@ -62,7 +66,9 @@ ALL_ACHIEVEMENTS = {
     "Admin": "You found the developer area with all the secrets and easter eggs! Yes I actually built a website just for that.",
 }
 
-class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
+class PasswordCheckerApp(ctk.CTk):   # One massive class. best way to do it.
+    
+    
     def __init__(self):
         super().__init__()
 
@@ -70,20 +76,20 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         self.title("Password Strength Checker")
         self.geometry("800x600") 
         self.resizable(False, False)
-        self.configure(bg=COLORS["background"])  # Use modern background color
-        ctk.set_appearance_mode("light") # Dark mode is for losers
-        self.protocol("WM_DELETE_WINDOW", self.on_close) # Handle window close event
+        self.configure(bg=COLORS["background"])  
+        ctk.set_appearance_mode("light") 
+        # Dark mode is for losers
+        self.protocol("WM_DELETE_WINDOW", self.on_close) 
+        # Handle window close event
 
         # Create widgets
         self.create_widgets()
 
-        # Konami code variables
+        # Varisbles for the key logger to work
         self.konami_progress = ""
         self.konami_code = "upupdowndownleftrightleftrightba"
-        # Developer access code variables
         self.dev_code_progress = ""
         self.dev_code = "bitrealm"
-        # Minigame code variables
         self.minigame_code_progress = ""
         self.minigame_code = "snakegame"
         self.pong_code_progress = ""
@@ -95,8 +101,8 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         self.memorymatch_code_progress = ""
         self.memorymatch_code = "memorymatch"
 
-
         self.last_check_times = []
+
         # Bind key events for secret buttons and Easter eggs
         self.bind_all("<Key>", self.key_listener)
         self.bind_all("<Escape>", self.show_self_destruct_button)
@@ -111,6 +117,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         self.start_time = time.time()
         
         self.load_progress() # Load achivement progress 
+
 
     def create_widgets(self):
         # Decorative header
@@ -284,9 +291,9 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
             border_color=COLORS["button_border"],
             command=self.open_about_window,
         )
-        self.about_button.place(relx=1.0, rely=1.0, anchor="se", x=-170, y=-20)  # 150px left of Help
+        self.about_button.place(relx=1.0, rely=1.0, anchor="se", x=-170, y=-20)  
 
-        # Hidden button (not packed by default) for Easter egg
+        # Hidden button (not packed by default) for halliday's egg
         self.hidden_button = ctk.CTkButton(
             self,
             text="Secret Button",
@@ -314,7 +321,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         )
         self.joke_button.place(relx=1.0, rely=1.0, anchor="se", x=-5, y=-5)
 
-        # Secret colour swap
+        # Secret colour swap button in the header
         self.header_label.bind("<Double-Button-1>", self.toggle_secret_theme)
 
         # Self-destruct button (hidden by default)
@@ -359,10 +366,9 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
             width=100,
             height=32,
         )
-        # Place above and inline with the help button (bottom right, just above Help)
         self.toggle_button.place(relx=1.0, rely=1.0, anchor="se", x=-20, y=-70)
 
-        # Achievements button (bottom left, above Dev Area button)
+        # Achievements button 
         self.achievements_button = ctk.CTkButton(
             self,
             text="Achievements",
@@ -376,7 +382,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         )
         self.achievements_button.place(relx=0.0, rely=1.0, anchor="sw", x=20, y=-20)
 
-        # Developer area button (now above Achievements button)
+        # Developer area button
         self.dev_area_button = ctk.CTkButton(
             self,
             text="Dev Area",
@@ -389,6 +395,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
             border_color=COLORS["button_border"],
             command=self.open_dev_area_quiz,
         )
+
 
     def open_help_window(self): # Help window with instructions on how to use the app.
         if hasattr(self, "help_win") and self.help_win.winfo_exists(): # Why is this the only way to check if a window exists?
@@ -420,6 +427,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         help_label.pack(padx=20, pady=20)
         self.help_win.attributes("-topmost", True) # Keep the help window on top
         self.help_win.lift()
+
 
     def open_about_window(self): # I know this is a mess, but I don't care.
         if hasattr(self, "about_win") and self.about_win.winfo_exists():
@@ -482,15 +490,18 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         self.about_win.attributes("-topmost", True)
         self.about_win.lift()
 
+
     def generate_secure_password(self):
         #Generate a random, secure password with widely accepted special characters.
         length =  16  # Length of the generated password
+        
         # Safe special characters for most sites
         safe_specials = "!@#$%^&*()-_=+[]{};:,.?/"
         characters = string.ascii_letters + string.digits + safe_specials
         password = "".join(random.choice(characters) for _ in range(length))
         self.password_entry.delete(0, "end")  # Clear the entry field
         self.password_entry.insert(0, password)  # Insert the generated password
+
 
     def check_password_strength(self):
         password = self.password_entry.get()
@@ -500,7 +511,6 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
             self.feedback_label.configure(text="Please enter a password to check its strength.")
             self.time_to_crack_label.configure(text="")
             self.pwned_count_label.configure(text="")
-            self.strength_bar.set(0.0)  # Make the bar empty if no password
             if self.secret_theme_on:
                 self.strength_bar.configure(progress_color="#504c54")
             else:
@@ -519,7 +529,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
                 else:
                     self.strength_bar.configure(progress_color="#989ca4")
                 return
-            elif password.lower() == "upupdowndownleftrightleftrightba": # Secret code. I wonder where else this pops up?
+            elif password.lower() == "upupdowndownleftrightleftrightba":  # Secret code. I wonder where else this pops up?
                 self.result_label.configure(text="Easter Egg!", text_color="#FFC107")
                 self.feedback_label.configure(text="Konami Code detected! Unfortunately, no extra lives here.")
                 self.time_to_crack_label.configure(text="")
@@ -529,13 +539,13 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
                 else:
                     self.strength_bar.configure(progress_color="#989ca4")
                 return
-            elif password.lower() == "nevergonnagiveyouup": # Lol
+            elif password.lower() == "nevergonnagiveyouup":  # Lol
                 self.result_label.configure(text="Rickrolled!", text_color="#FFC107")
                 self.feedback_label.configure(text="🎵 Never gonna let you down... but this password will!")
                 self.time_to_crack_label.configure(text="")
                 self.pwned_count_label.configure(text="")
                 self.unlock_achievement("Rickrolled", "Never gonna give rickrolling you up!") 
-                webbrowser.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ") # Opens Rick Astley's "Never Gonna Give You Up" music video
+                webbrowser.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ")  # Opens Rick Astley's "Never Gonna Give You Up" music video
                 if self.secret_theme_on:
                     self.strength_bar.configure(progress_color="#504c54")
                 else:
@@ -556,7 +566,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
                 self.time_to_crack_label.configure(text="")
                 self.pwned_count_label.configure(text="")
                 self.unlock_achievement("Distracted", "You distracted the password checker!")
-                webbrowser.open("https://www.youtube.com/watch?v=XP_ZivuN6iY")
+                webbrowser.open("https://www.youtube.com/watch?v=XP_ZivuN6iY") 
                 if self.secret_theme_on:
                     self.strength_bar.configure(progress_color="#504c54")
                 else:
@@ -588,8 +598,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
                     self.strength_bar.configure(progress_color="#504c54")
                 else:
                     self.strength_bar.configure(progress_color="#989ca4")
-            # Palindrome password easter egg
-            elif password and password.lower() == password.lower()[::-1] and len(password) > 2:
+            elif password and password.lower() == password.lower()[::-1] and len(password) > 2:   # Palindrome password easter egg
                 self.result_label.configure(text="Palindrome!", text_color="#FFC107")
                 self.feedback_label.configure(text="Cool, your password is a palindrome!")
                 self.time_to_crack_label.configure(text="")
@@ -617,7 +626,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
                     self.strength_bar.configure(progress_color="#504c54")
                 else:
                     self.strength_bar.configure(progress_color="#989ca4")
-            elif self.is_password_in_github_list(password): # Check against GitHub password list
+            elif self.is_password_in_github_list(password):  # Check against GitHub password list
                 self.result_label.configure(text="Common", text_color="#FF5252")
                 self.feedback_label.configure(text="This password appears in a public list and is really common. Choose another one!")
                 self.time_to_crack_label.configure(text="")
@@ -644,7 +653,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
                         text_color="#FF5252"  # Red for breached
                     )
                 else:
-                    color = COLORS["text_secondary"] if not self.secret_theme_on else "#CCCCCC" # Have to do it this way because you can't use an if statement in a function call.
+                    color = COLORS["text_secondary"] if not self.secret_theme_on else "#CCCCCC"  # Have to do it this way because you can't use an if statement in a function call.
                     self.pwned_count_label.configure(
                         text="This password has not been found in any known data breaches.",
                         text_color=color
@@ -659,10 +668,13 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
                 self.unlock_achievement("Impossible Password", "Entered a password longer than 100 characters!")
             
             self.last_check_times.append(time.time())
+            
             if len(self.last_check_times) > 5:
                 self.last_check_times.pop(0)
+                
             if len(self.last_check_times) == 5 and self.last_check_times[-1] - self.last_check_times[0] <= 10:
                 self.unlock_achievement("Speed Demon", "Checked 5 passwords in under 10 seconds!")
+                
             now = datetime.datetime.now()
             if 0 <= now.hour < 3:
                 self.unlock_achievement("Night Owl", "Used the app between midnight and 3am!")
@@ -697,20 +709,20 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
             entropy = 0
 
         # Estimate time to crack using logarithms to avoid overflow
-        guesses_per_second = Decimal(1e14)  # Assume 100 Trillion guesses per second
+        guesses_per_second = Decimal(1e14)   # Assume 100 Trillion guesses per second
 
         try:
-            log_total_guesses = Decimal(entropy)  # Use entropy directly in logarithmic form
+            log_total_guesses = Decimal(entropy)   # Use entropy directly in logarithmic form
             seconds_to_crack = Decimal(2) ** log_total_guesses / guesses_per_second
             # Have to use Decimal for large numbers to avoid overflow issues
 
             # Heat death of the universe: ~1e100 years in seconds
             heat_death_seconds = Decimal("1e100") * Decimal(31536000)
 
-            if seconds_to_crack > 100 * heat_death_seconds:  # If it takes longer than the heat death of the universe 100 times over
-                time_to_crack = "Longer than the heat death of the universe! 100 times over! Probably pretty secure."
+            if seconds_to_crack > 100 * heat_death_seconds:  
+                time_to_crack = "Longer than the heat death of the universe! 100 times over!"
             elif seconds_to_crack > heat_death_seconds:
-                time_to_crack = "Longer than the heat death of the universe! Probably pretty secure."
+                time_to_crack = "Longer than the heat death of the universe!"
             elif seconds_to_crack < 60:
                 time_to_crack = f"{seconds_to_crack:.2f} seconds"
             elif seconds_to_crack < 3600:
@@ -742,10 +754,12 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
             self.strength_bar.configure(progress_color="#66BB6A")
             return "Very Strong", "#66BB6A", "Your password is excellent!", time_to_crack  # Lighter green for very strong passwords
 
+
     def copy_password_to_clipboard(self): # Self explanatory
         password = self.password_entry.get()
         self.clipboard_clear()
         self.clipboard_append(password)
+
 
     def get_password_list(self): 
         #Download the password list once and cache it locally.
@@ -763,11 +777,12 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
                 return None
         return cache_file
 
+
     def is_password_in_github_list(self, password):
         # Check if the password is in the cached GitHub list.
         cache_file = self.get_password_list()
         if not cache_file:
-            return False  # Could not download or access the file
+            return False  
 
         try:
             with open(cache_file, "r", encoding="utf-8", errors="ignore") as f:
@@ -778,12 +793,14 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
             print(f"Error reading cached password list: {e}")
         return False
 
+
     def validate_password_input(self, new_value): 
     # Only allow valid characters in the password entry, nothing else
         for c in new_value:
             if c not in ALLOWED_PASSWORD_CHARS:
                 return False
         return True
+
 
     # Secret buttons also happens to be a fully functional key logger, but i dont really want to know what you type.
     def key_listener(self, event):
@@ -839,7 +856,8 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
                 self.pong_code_progress = ""
         else:
             self.pong_code_progress = ""
-            
+        
+        # For minesweeper minigame
         if event.char.isalnum():
             self.minesweeper_code_progress += event.char.lower()
             if len(self.minesweeper_code_progress) > len(self.minesweeper_code):
@@ -849,7 +867,8 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
                 self.minesweeper_code_progress = ""
         else:
             self.minesweeper_code_progress = ""
-            
+        
+        # For tic-tac-toe minigame
         if event.char.isalnum():
             self.tictactoe_code_progress += event.char.lower()
             if len(self.tictactoe_code_progress) > len(self.tictactoe_code):
@@ -860,6 +879,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         else:
             self.tictactoe_code_progress = ""
 
+        # For memory match minigame
         if event.char.isalnum():
             self.memorymatch_code_progress += event.char.lower()
             if len(self.memorymatch_code_progress) > len(self.memorymatch_code):
@@ -870,9 +890,11 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         else:
             self.memorymatch_code_progress = ""
 
+
     def show_hidden_button(self):
         # Place the hidden button next to the self-destruct button at the bottom right
         self.hidden_button.place(relx=1.0, rely=1.0, anchor="se", x=-470, y=-20)
+
 
     def hallidays_egg(self): # A good book, terrible movie tho
         self.result_label.configure(text="🎉 Golden egg Unlocked! 🎉", text_color="#FFD700")
@@ -880,6 +902,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         self.time_to_crack_label.configure(text="")
         self.pwned_count_label.configure(text="")
         self.unlock_achievement("Ready player one", "You found halliday's egg!")
+
 
     def toggle_secret_theme(self, event=None):
         # Toggle a secret dark theme on double-clicking the header
@@ -899,7 +922,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
             self.generate_button.configure(fg_color="#4CAF50", hover_color="#388E3C")
             self.copy_button.configure(fg_color="#FFA500", hover_color="#CC8400")
             self.secret_theme_on = True
-            self.check_password_strength()  # Re-check the password strength to update colors
+            self.check_password_strength()   # Re-check the password strength to update colors
         else:
             ctk.set_appearance_mode("light")
             self.header_frame.configure(fg_color=COLORS["header"])
@@ -915,11 +938,11 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
             self.generate_button.configure(fg_color="#4CAF50", hover_color="#388E3C")
             self.copy_button.configure(fg_color="#FFA500", hover_color="#CC8400")
             self.secret_theme_on = False
-            self.check_password_strength()  # Re-check the password strength to update colors
+            self.check_password_strength()   # Re-check the password strength to update colors
+
 
     def show_random_joke(self):
-        import random
-        jokes = [ # programming jokes
+        jokes = [ 
             "Why do programmers prefer dark mode?\nBecause light attracts bugs!",
             "A SQL query walks into a bar, walks up to two tables and asks:\n'Can I join you?'",
             "Why do Java developers wear glasses?\nBecause they don't see sharp.",
@@ -958,11 +981,14 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
             
         self.unlock_achievement("Funny guy", "Hope you enjoyed the joke!")
 
+
     def show_self_destruct_button(self, event=None):
         # Place the self-destruct button at the bottom right, aligned with the other buttons
         self.self_destruct_button.place(relx=1.0, rely=1.0, anchor="se", x=-320, y=-20)
 
+
     def self_destruct_sequence(self):
+        # Destroy the window
         popup = ctk.CTkToplevel(self)
         popup.title("Self-Destruct Sequence")
         popup.geometry("350x120")
@@ -981,8 +1007,8 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         popup.lift()
         self.after(2000, self.destroy)  # Close the app after 2 seconds
 
+
     def open_dev_area_quiz(self):
-        # List of (question, answer) pairs
         # Quiz to get into dev area
         if hasattr(self, "quiz_popup") and self.quiz_popup.winfo_exists():
             self.quiz_popup.lift()
@@ -1025,7 +1051,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         # Check the answer to the current quiz question to see if the person can access
         answer = self.quiz_entry.get()
         correct = self.quiz_questions[self.quiz_index][1]
-        if re.sub(r"\s+", "", answer).lower() == re.sub(r"\s+", "", correct).lower(): # Ignore whitespace and case
+        if re.sub(r"\s+", "", answer).lower() == re.sub(r"\s+", "", correct).lower():   # Ignore whitespace and case
             self.quiz_score += 1
         self.quiz_index += 1
         if self.quiz_index < len(self.quiz_questions):
@@ -1034,7 +1060,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         else:
             self.quiz_popup.destroy()
             if self.quiz_score == len(self.quiz_questions):
-                self.open_dev_area() # must get everything correct
+                self.open_dev_area()   # must get everything correct
             else:
                 popup = ctk.CTkToplevel(self)
                 popup.title("Access Denied")
@@ -1045,17 +1071,19 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
                 popup.configure(fg_color=COLORS["window_bg"])
                 popup.lift()
 
+
     def open_dev_area(self): 
-        path = os.path.abspath("index.html")  # or use the full path if needed
-        webbrowser.open(f"file:///{path.replace(os.sep, '/')}")
+        path = os.path.abspath("index.html")  
+        webbrowser.open(f"file:///{path.replace(os.sep, '/')}") 
+        # Opens and hosts the website for the dev area
         self.unlock_achievement("Admin", "You found the developer area with all the secrets and easter eggs! Yes I actually built a website just for that.")
         # Trying to cheat and see all the easter eggs of the program? Well, you have to answer some questions first. 
-
 
 
     def show_dev_area_button(self, event=None):
         # Place the dev area button at the bottom left
         self.dev_area_button.place(relx=0.0, rely=1.0, anchor="sw", x=20, y=-70)
+
 
     def toggle_password_visibility(self):
         self.show_password = not self.show_password
@@ -1077,7 +1105,6 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
             self.feedback_label.configure(text="Wow, you really like this button! Here's a secret: You can toggle password visibility with it!")
         elif self.toggle_clicks > 150 and self.toggle_clicks % 50 == 0:
             self.feedback_label.configure(text=f"You've clicked {self.toggle_clicks} times. Impressive dedication!")
-        
 
 
     def launch_snake_minigame(self):
@@ -1151,8 +1178,9 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         move()
         snake_win.focus_set()
 
-    def launch_pong_minigame(self):
 
+    def launch_pong_minigame(self):
+        # Fun pong clone
         pong_win = tk.Toplevel(self)
         pong_win.title("🏓 Pong Minigame 🏓")
         pong_win.geometry("500x400")
@@ -1261,7 +1289,9 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         move_ball()
         pong_win.focus_set()
 
+
     def launch_minesweeper_minigame(self):
+        # A fully functional minesweeper clone
         rows, cols, mines = 8, 8, 10
 
         win = tk.Toplevel(self)
@@ -1374,7 +1404,9 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         win.focus_set()
         win.grab_set()
 
+
     def launch_tictactoe_minigame(self):
+        # A simple Tic-Tac-Toe game against a random AI
         win = tk.Toplevel(self)
         win.title("Tic-Tac-Toe")
         win.resizable(False, False)
@@ -1453,6 +1485,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
 
 
     def launch_memory_match_minigame(self):
+        # A simple Memory Match game with 8 pairs of cards
         win = tk.Toplevel(self)
         win.title("Memory Match")
         win.resizable(False, False)
@@ -1598,7 +1631,9 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         popup.attributes("-topmost", True)
         popup.lift()
 
-    def save_progress(self): # saves achievement progress between runs
+
+    def save_progress(self): 
+        # Aaves achievement progress between runs to a json file
         data = {
             "achievements": list(self.achievements),
             "password_checks": self.password_checks
@@ -1607,8 +1642,8 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
             with open("progress.json", "w") as f:
                 json.dump(data, f)
         except Exception as e:
-           
             print(f"Error saving progress: {e}")
+
 
     def load_progress(self): # Loads/ creates achievement file
         try:
@@ -1621,14 +1656,31 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
             self.achievements = set()
             self.password_checks = 0
 
+
     def on_close(self):
         if time.time() - self.start_time < 5:
             self.unlock_achievement("The Quitter", "Closed the app within 5 seconds of opening it!")
         self.destroy()
 
+    def play_blackhole_effect():
+        effect = Blackhole("██╗      ██████╗  ██████╗ ██╗  ██╗     █████╗ ████████╗    ████████╗██╗  ██╗███████╗     ██████╗ ██╗   ██╗██╗\n██║     ██╔═══██╗██╔═══██╗██║ ██╔╝    ██╔══██╗╚══██╔══╝    ╚══██╔══╝██║  ██║██╔════╝    ██╔════╝ ██║   ██║██║\n██║     ██║   ██║██║   ██║█████╔╝     ███████║   ██║          ██║   ███████║█████╗      ██║  ███╗██║   ██║██║\n██║     ██║   ██║██║   ██║██╔═██╗     ██╔══██║   ██║          ██║   ██╔══██║██╔══╝      ██║   ██║██║   ██║██║\n███████╗╚██████╔╝╚██████╔╝██║  ██╗    ██║  ██║   ██║          ██║   ██║  ██║███████╗    ╚██████╔╝╚██████╔╝██║\n╚══════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝    ╚═╝  ╚═╝   ╚═╝          ╚═╝   ╚═╝  ╚═╝╚══════╝     ╚═════╝  ╚═════╝ ╚═╝\n\n© 2024 BitRealm Studios. All right reserved.\nCreated by Benjamin Robertson")
+        with effect.terminal_output() as terminal:
+            for frame in effect:
+                if stop_blackhole.is_set():
+                    break
+                terminal.print(frame)
+
+
+
+
 if __name__ == "__main__":
     os.system('cls||clear')  # Clear the console even for stupid macs
-    print("\u001b[31;1mLook at the GUI, not the console.") # Colours in the console
-    print("\u001b[34m\u001b[0m", end="") 
+    stop_blackhole = threading.Event()  # Create an event to signal stopping
     app = PasswordCheckerApp()
+    blackhole_thread = threading.Thread(target=app.play_blackhole_effect, args=(stop_blackhole,), daemon=True) # Have to do the threading outside the class to avoid circular imports
+    blackhole_thread.start()
     app.mainloop()
+    stop_blackhole.set()  # Signal the effect to stop
+    blackhole_thread.join(timeout=1)  # Wait briefly for the thread to finish
+    os.system('cls||clear')  # Clear the console again after closing the app
+
