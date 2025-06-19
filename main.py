@@ -10,6 +10,8 @@ import webbrowser # For easter eggs
 import pwnedpass # For checking if the password has been pwned in data breaches
 import tkinter as tk # for secret minigames
 import json # For achievement storage
+import time # For timing password checks
+import datetime # For seeing how degenerate you are with your password checks
 
 
 # Define a modern color palette for the app
@@ -52,6 +54,11 @@ ALL_ACHIEVEMENTS = {
     "Minesweeper Master": "You won the Minesweeper minigame!",
     "Tic-Tac-Toe Champ": "You won the Tic-Tac-Toe!",
     "Memory Master": "You won the Memory Match minigame!",
+    "Curiosity Killed the Cat": "Clicked the joke button 10 times in a row!",
+    "Speed Demon": "Checked 5 passwords in under 10 seconds!",
+    "Impossible Password": "Entered a password longer than 100 characters!",
+    "Night Owl": "Used the app between midnight and 3am!",
+    "The Quitter": "Closed the app within 5 seconds of opening it!",
     "Admin": "You found the developer area with all the secrets and easter eggs! Yes I actually built a website just for that.",
 }
 
@@ -65,6 +72,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         self.resizable(False, False)
         self.configure(bg=COLORS["background"])  # Use modern background color
         ctk.set_appearance_mode("light") # Dark mode is for losers
+        self.protocol("WM_DELETE_WINDOW", self.on_close) # Handle window close event
 
         # Create widgets
         self.create_widgets()
@@ -87,6 +95,8 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         self.memorymatch_code_progress = ""
         self.memorymatch_code = "memorymatch"
 
+
+        self.last_check_times = []
         # Bind key events for secret buttons and Easter eggs
         self.bind_all("<Key>", self.key_listener)
         self.bind_all("<Escape>", self.show_self_destruct_button)
@@ -97,6 +107,8 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         self.last_joke = None
         self.achievements = set()
         self.password_checks = 0
+        self.joke_streak = 0
+        self.start_time = time.time()
         
         self.load_progress() # Load achivement progress 
 
@@ -643,6 +655,17 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
             if self.password_checks == 100:
                 self.unlock_achievement("Century Checker", "You've checked 100 passwords!")
             self.save_progress()
+            if len(password) > 100:
+                self.unlock_achievement("Impossible Password", "Entered a password longer than 100 characters!")
+            
+            self.last_check_times.append(time.time())
+            if len(self.last_check_times) > 5:
+                self.last_check_times.pop(0)
+            if len(self.last_check_times) == 5 and self.last_check_times[-1] - self.last_check_times[0] <= 10:
+                self.unlock_achievement("Speed Demon", "Checked 5 passwords in under 10 seconds!")
+            now = datetime.datetime.now()
+            if 0 <= now.hour < 3:
+                self.unlock_achievement("Night Owl", "Used the app between midnight and 3am!")
 
     def evaluate_password(self, password):
         # Initialize feedback
@@ -930,6 +953,9 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
         label.pack(expand=True, fill="both", padx=15, pady=15)
         popup.attributes("-topmost", True)
         popup.lift()
+        self.joke_streak += 1
+        if self.joke_streak == 10:self.unlock_achievement("Curiosity Killed the Cat", "Clicked the joke button 10 times in a row!")
+            
         self.unlock_achievement("Funny guy", "Hope you enjoyed the joke!")
 
     def show_self_destruct_button(self, event=None):
@@ -1581,6 +1607,7 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
             with open("progress.json", "w") as f:
                 json.dump(data, f)
         except Exception as e:
+           
             print(f"Error saving progress: {e}")
 
     def load_progress(self): # Loads/ creates achievement file
@@ -1593,6 +1620,11 @@ class PasswordCheckerApp(ctk.CTk): # One massive class. best way to do it.
             # No file or error, just start fresh
             self.achievements = set()
             self.password_checks = 0
+
+    def on_close(self):
+        if time.time() - self.start_time < 5:
+            self.unlock_achievement("The Quitter", "Closed the app within 5 seconds of opening it!")
+        self.destroy()
 
 if __name__ == "__main__":
     os.system('cls||clear')  # Clear the console even for stupid macs
