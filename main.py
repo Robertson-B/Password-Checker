@@ -1662,7 +1662,7 @@ class PasswordCheckerApp(ctk.CTk):   # One massive class. best way to do it.
             self.unlock_achievement("The Quitter", "Closed the app within 5 seconds of opening it!")
         self.destroy()
 
-    def play_blackhole_effect():
+    def play_blackhole_effect(self, stop_blackhole):
         effect = Blackhole("██╗      ██████╗  ██████╗ ██╗  ██╗     █████╗ ████████╗    ████████╗██╗  ██╗███████╗     ██████╗ ██╗   ██╗██╗\n██║     ██╔═══██╗██╔═══██╗██║ ██╔╝    ██╔══██╗╚══██╔══╝    ╚══██╔══╝██║  ██║██╔════╝    ██╔════╝ ██║   ██║██║\n██║     ██║   ██║██║   ██║█████╔╝     ███████║   ██║          ██║   ███████║█████╗      ██║  ███╗██║   ██║██║\n██║     ██║   ██║██║   ██║██╔═██╗     ██╔══██║   ██║          ██║   ██╔══██║██╔══╝      ██║   ██║██║   ██║██║\n███████╗╚██████╔╝╚██████╔╝██║  ██╗    ██║  ██║   ██║          ██║   ██║  ██║███████╗    ╚██████╔╝╚██████╔╝██║\n╚══════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝    ╚═╝  ╚═╝   ╚═╝          ╚═╝   ╚═╝  ╚═╝╚══════╝     ╚═════╝  ╚═════╝ ╚═╝\n\n© 2024 BitRealm Studios. All right reserved.\nCreated by Benjamin Robertson")
         with effect.terminal_output() as terminal:
             for frame in effect:

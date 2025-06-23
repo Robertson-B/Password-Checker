@@ -37,6 +37,8 @@ Enjoy a cool Blackhole animation in your terminal when you start the app.
 Clone the repository
 
 Pip install the requirements.txt file
+
+Make Sure the progress.json File is empty to reset application and achievements
 ## Usage
 Enter a password and click Check Strength.
 
