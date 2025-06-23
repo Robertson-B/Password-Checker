@@ -63,7 +63,11 @@ ALL_ACHIEVEMENTS = {
     "Impossible Password": "Entered a password longer than 100 characters!",
     "Night Owl": "Used the app between midnight and 3am!",
     "The Quitter": "Closed the app within 5 seconds of opening it!",
-    "Admin": "You found the developer area with all the secrets and easter eggs! Yes I actually built a website just for that.",
+    "Copycat": "Used the Copy to Clipboard button 10 times!",
+    "Feedback Loop": "Opened the help window 5 times!",
+    "404 Not Found": "Feedback not found!",
+    "The Cake is a Lie": "You entered the forbidden Portal password!",
+    "Admin": "You found the developer area with all the secrets and easter eggs! ",
 }
 
 class PasswordCheckerApp(ctk.CTk):   # One massive class. best way to do it.
@@ -100,6 +104,8 @@ class PasswordCheckerApp(ctk.CTk):   # One massive class. best way to do it.
         self.tictactoe_code = "tictactoe"
         self.memorymatch_code_progress = ""
         self.memorymatch_code = "memorymatch"
+        self.copy_count = 0
+        self.help_open_count = 0
 
         self.last_check_times = []
 
@@ -427,6 +433,9 @@ class PasswordCheckerApp(ctk.CTk):   # One massive class. best way to do it.
         help_label.pack(padx=20, pady=20)
         self.help_win.attributes("-topmost", True) # Keep the help window on top
         self.help_win.lift()
+        self.help_open_count += 1
+        if self.help_open_count == 5:
+            self.unlock_achievement("Feedback Loop", "Opened the help window 5 times!")
 
 
     def open_about_window(self): # I know this is a mess, but I don't care.
@@ -598,6 +607,16 @@ class PasswordCheckerApp(ctk.CTk):   # One massive class. best way to do it.
                     self.strength_bar.configure(progress_color="#504c54")
                 else:
                     self.strength_bar.configure(progress_color="#989ca4")
+            elif password.lower() == "404":
+                self.result_label.configure(text="404 Not Found!", text_color="#FF5252")
+                self.feedback_label.configure(text="This password is not found in our database, but it's still weak!")
+                self.time_to_crack_label.configure(text="")
+                self.pwned_count_label.configure(text="")
+                self.unlock_achievement("404 Not Found", "Feedback not found!")
+                if self.secret_theme_on:
+                    self.strength_bar.configure(progress_color="#504c54")
+                else:
+                    self.strength_bar.configure(progress_color="#989ca4")
             elif password and password.lower() == password.lower()[::-1] and len(password) > 2:   # Palindrome password easter egg
                 self.result_label.configure(text="Palindrome!", text_color="#FFC107")
                 self.feedback_label.configure(text="Cool, your password is a palindrome!")
@@ -622,6 +641,16 @@ class PasswordCheckerApp(ctk.CTk):   # One massive class. best way to do it.
                 self.feedback_label.configure(text="Iron Man approves, but hackers do too!")
                 self.time_to_crack_label.configure(text="")
                 self.pwned_count_label.configure(text="")
+                if self.secret_theme_on:
+                    self.strength_bar.configure(progress_color="#504c54")
+                else:
+                    self.strength_bar.configure(progress_color="#989ca4")
+            elif password.lower() == "thecakeisalie":
+                self.result_label.configure(text="The Cake is a Lie!", text_color="#FFC107")
+                self.feedback_label.configure(text="You won't find cake here, just weak passwords.")
+                self.time_to_crack_label.configure(text="")
+                self.pwned_count_label.configure(text="")
+                self.unlock_achievement("The Cake is a Lie", "You entered the forbidden Portal password!")
                 if self.secret_theme_on:
                     self.strength_bar.configure(progress_color="#504c54")
                 else:
@@ -759,6 +788,9 @@ class PasswordCheckerApp(ctk.CTk):   # One massive class. best way to do it.
         password = self.password_entry.get()
         self.clipboard_clear()
         self.clipboard_append(password)
+        self.copy_count += 1
+        if self.copy_count == 10:
+            self.unlock_achievement("Copycat", "Used the Copy to Clipboard button 10 times!")
 
 
     def get_password_list(self): 
@@ -1076,7 +1108,7 @@ class PasswordCheckerApp(ctk.CTk):   # One massive class. best way to do it.
         path = os.path.abspath("index.html")  
         webbrowser.open(f"file:///{path.replace(os.sep, '/')}") 
         # Opens and hosts the website for the dev area
-        self.unlock_achievement("Admin", "You found the developer area with all the secrets and easter eggs! Yes I actually built a website just for that.")
+        self.unlock_achievement("Admin", "You found the developer area with all the secrets and easter eggs!")
         # Trying to cheat and see all the easter eggs of the program? Well, you have to answer some questions first. 
 
 
